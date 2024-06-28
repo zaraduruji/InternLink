@@ -59,50 +59,47 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
   }
 
   return (
-    <div className='signup-page'>
-      <div className='signup'>
-        <h1>Welcome to InternLink</h1>
-        <p className='create-account-text'>Create an account</p>
-        <form onSubmit={handleSignup}>
-          <input
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <select name='role' onChange={(e) => setRole(e.target.value)} required>
-            <option value="">Select Role</option>
-            <option value="employee">Employee/Recruiter</option>
-            <option value="student">Student</option>
-          </select>
-          {error && <div className="error">{error}</div>}
-          <p>Already have an account? <a className='login-link' onClick={navigateToLogin}>Login</a></p>
-          <button type="submit" className='signup-button'>Sign Up</button>
-        </form>
-      </div>
-    </div>
+    <div className='signup-form'>
+      <h2>Sign Up for InternLink</h2>
+      <form onSubmit={handleSignup}>
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+        <select name='role' onChange={(e) => setRole(e.target.value)} required>
+          <option value="">Select Role</option>
+          <option value="employee">Employee/Recruiter</option>
+          <option value="student">Student</option>
+        </select>
+        {error && <div className="error">{error}</div>}
+        <button type="submit" className='signup-button'>Sign Up</button>
+        <p>Already have an account? <a className='login-link' onClick={navigateToLogin}>Login</a></p>
+      </form>
+  </div>
   );
 }
 
