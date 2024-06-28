@@ -54,9 +54,10 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
     }
   }
 
-  function navigateToLogin() {
-    navigate("/login");
-  }
+  const handleLoginClick = () => {
+    setShowSignupModal(false);
+    setShowLoginModal(true);
+  };
 
   return (
     <div className='signup-form'>
@@ -97,7 +98,7 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
         </select>
         {error && <div className="error">{error}</div>}
         <button type="submit" className='signup-button'>Sign Up</button>
-        <p>Already have an account? <a className='login-link' onClick={navigateToLogin}>Login</a></p>
+        <p>Already have an account? <a href="#" onClick={handleLoginClick}>Log In</a></p>
       </form>
   </div>
   );

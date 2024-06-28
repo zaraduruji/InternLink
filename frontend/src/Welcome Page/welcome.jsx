@@ -14,9 +14,9 @@ const Welcome = () => {
   const [fadeInButtons, setFadeInButtons] = useState(false);
 
   useEffect(() => {
-    const welcomeTextTimer = setTimeout(() => setFadeInWelcomeText(true), 500); // Adjust delay
-    const catchPhraseTimer = setTimeout(() => setFadeInCatchPhrase(true), 3000); // Adjust delay
-    const buttonsTimer = setTimeout(() => setFadeInButtons(true), 5500); // Adjust delay
+    const welcomeTextTimer = setTimeout(() => setFadeInWelcomeText(true), 300); // Reduced delay
+    const catchPhraseTimer = setTimeout(() => setFadeInCatchPhrase(true), 1000); // Reduced delay
+    const buttonsTimer = setTimeout(() => setFadeInButtons(true), 1700); // Reduced delay
 
     return () => {
       clearTimeout(welcomeTextTimer);
@@ -33,7 +33,7 @@ const Welcome = () => {
       </video>
       <div className="overlay">
         <h1 className={`welcome-text ${fadeInWelcomeText ? 'fade-in' : ''}`}>Welcome to InternLink!</h1>
-        <h2 className={`catch-phrase ${fadeInCatchPhrase ? 'fade-in' : ''}`}>Your gateway to the best internships.</h2>
+        <h2 className={`catch-phrase ${fadeInCatchPhrase ? 'fade-in' : ''}`}>Your gateway to the best internships</h2>
         <div className={`buttons ${fadeInButtons ? 'fade-in' : ''}`}>
           <button className="login-button" onClick={() => setShowLoginModal(true)}>Log In</button>
           <button className="signup-button" onClick={() => setShowSignupModal(true)}>Sign Up</button>
