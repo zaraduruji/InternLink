@@ -6,6 +6,7 @@ import Welcome from './Welcome Page/welcome';
 import Login from './Login Page/Login';
 import Signup from './Signup Page/Signup';
 import { UserContext } from './UserContext'; // Ensure you have this context file
+import Home from './Home Page/Home';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/" element={<Welcome />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/home" element={<Home />} />
         </Routes>
       </Router>
     </UserContext.Provider>

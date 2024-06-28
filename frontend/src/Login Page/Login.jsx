@@ -34,7 +34,7 @@ function Login({ setShowLoginModal, setShowSignupModal }) {
         const loggedInUser = data.user;
         updateUser(loggedInUser);
         setShowLoginModal(false);
-        navigate("/");
+        navigate("/home");
       } else {
         setError("Login failed");
       }
@@ -51,27 +51,29 @@ function Login({ setShowLoginModal, setShowSignupModal }) {
   };
 
   return (
-    <div className="login-form">
-      <h2>Log In to InternLink</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" className="login-button" disabled={loading}>Log In</button>
-      </form>
-      <p>No account? <a href="#" onClick={handleSignupClick}>Sign Up</a></p>
-      {error && <p className="error">{error}</p>}
+    <div className="modal-background">
+      <div className="modal-content">
+        <h2>Log In to InternLink</h2>
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" className="login-button" disabled={loading}>Log In</button>
+        </form>
+        <p>No account? <a href="#" onClick={handleSignupClick}>Sign Up</a></p>
+        {error && <p className="error">{error}</p>}
+      </div>
     </div>
   );
 }

@@ -40,8 +40,8 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
       if (response.ok) {
         const data = await response.json();
         console.log(data)
-        navigate("/projects");
 
+        navigate("/home");
         if (data.error) {
           setError(data.error);
         }
