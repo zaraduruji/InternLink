@@ -6,20 +6,37 @@ import './Home.css';
 const Home = () => {
   return (
     <div className="home-container">
-      <header className="header">
-        <h1>Welcome to InternLink</h1>
+      <header className="home-header">
+        <div className="logo">InternLink</div>
+        <div className="search-bar">
+          <input type="text" placeholder="Search" />
+        </div>
+        <div className="notifications">
+          <span className="notification-icon">🔔</span>
+        </div>
       </header>
-      <div className="content">
-        <aside className="sidebar">
-          <p>Sidebar</p>
-        </aside>
-        <main className="main-content">
-          <p>Welcome you have successfully logged in!</p>
-        </main>
-        <aside className="right-sidebar">
-          <p>Right Sidebar</p>
-        </aside>
+
+      <div className="stories-lineup">
+        <div className="story"></div>
+        <div className="story"></div>
+        <div className="story"></div>
+        <div className="story"></div>
+        <div className="story"></div>
       </div>
+
+      <div className="listings">
+        <div className="listing">Job/Internship 1</div>
+        <div className="listing">Job/Internship 2</div>
+        <div className="listing">Job/Internship 3</div>
+        <div className="listing">Job/Internship 4</div>
+        <div className="listing">Job/Internship 5</div>
+      </div>
+
+      <nav className="navbar">
+        <span className="nav-icon">🏠</span>
+        <span className="nav-icon">👥</span>
+        <span className="nav-icon">👤</span>
+      </nav>
     </div>
   );
 };
