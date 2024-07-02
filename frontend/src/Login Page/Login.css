@@ -4,7 +4,7 @@
   text-align: center;
 }
 
-h2{
+h2 {
   text-align: center;
 }
 
@@ -23,6 +23,23 @@ input {
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+}
+
+.password-container {
+  position: relative;
+}
+
+.password-container input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 
 .login-button {
