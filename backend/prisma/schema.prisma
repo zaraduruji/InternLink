@@ -20,3 +20,24 @@ model User {
   password String
   role     String
 }
+
+model JobListing {
+  id                Int       @id @default(autoincrement())
+  role              String
+  userProfilePicture String
+  imageUrl          String?
+  description       String
+  timestamp         DateTime  @default(now())
+  companyName       String
+  uploaderName      String
+  likeCount         Int?      @default(0)
+  comments          Comment[]
+}
+
+model Comment {
+  id          Int       @id @default(autoincrement())
+  content     String
+  timestamp   DateTime  @default(now())
+  jobListing  JobListing @relation(fields: [jobListingId], references: [id])
+  jobListingId Int
+}

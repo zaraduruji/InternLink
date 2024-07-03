@@ -145,6 +145,82 @@ body {
   margin: 10px 0;
   padding: 20px;
   border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.post-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.post-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-user-name {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.post-company-name {
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+.post-timestamp {
+  font-size: 0.8em;
+  color: #aaa;
+}
+
+.post-description {
+  margin: 10px 0;
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+}
+
+.post-action-icon {
+  margin-right: 5px;
+}
+
+.post-comments {
+  margin-top: 10px;
+}
+
+.comment {
+  font-size: 0.9em;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+.comment-timestamp {
+  font-size: 0.8em;
+  color: #aaa;
 }
 
 .suggested-connections {

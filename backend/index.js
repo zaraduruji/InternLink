@@ -5,6 +5,8 @@ import env from 'dotenv';
 import session from 'express-session';
 import Sequelize from 'sequelize';
 import SequelizeStoreInit from 'connect-session-sequelize';
+import fs from 'fs';
+import path from 'path';
 import router from './users.js';
 
 const app = express();
@@ -44,8 +46,16 @@ app.use(
 sessionStore.sync();
 app.use(router);
 
-app.use((req, res, next) => {
-  next();
+// Serve job listings from jobListings.json
+app.get('/api/job-listings', (req, res) => {
+  const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
+  fs.readFile(jsonFilePath, 'utf8', (err, data) => {
+    if (err) {
+      res.status(500).send('Error reading JSON file');
+      return;
+    }
+    res.json(JSON.parse(data));
+  });
 });
 
 app.get('/', (req, res) => {
