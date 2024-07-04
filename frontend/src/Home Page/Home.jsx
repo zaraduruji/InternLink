@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faSearch, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH, faBookmark, faAdjust, faThumbsUp, faComment } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faHome, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH, faAdjust, faBookmark, faThumbsUp, faComment, faTimes } from '@fortawesome/free-solid-svg-icons';
 import logo from '/logo.png';
 
 const Home = () => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [jobListings, setJobListings] = useState([]);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
 
   const toggleMore = () => {
     setIsMoreOpen(!isMoreOpen);
@@ -25,6 +28,19 @@ const Home = () => {
       .catch(error => console.error('Error fetching job listings:', error));
   }, []);
 
+  useEffect(() => {
+    if (searchTerm) {
+      const results = jobListings.filter(job =>
+        job.uploaderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchTerm, jobListings]);
+
   return (
     <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
       <aside className="sidebar">
@@ -37,7 +53,7 @@ const Home = () => {
             <FontAwesomeIcon icon={faHome} className="nav-icon" />
             <span className="nav-text">Home</span>
           </div>
-          <div className="nav-item">
+          <div className="nav-item" onClick={() => setSearchModalOpen(true)}>
             <FontAwesomeIcon icon={faSearch} className="nav-icon" />
             <span className="nav-text">Search</span>
           </div>
@@ -125,6 +141,38 @@ const Home = () => {
         <div className="connection">Connection 3</div>
         <div className="connection">Connection 4</div>
       </aside>
+
+      {searchModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <div className="search-bar">
+              <FontAwesomeIcon icon={faSearch} className="search-icon" />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="close-button" onClick={() => setSearchModalOpen(false)}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
+            <div className="search-results">
+              {searchResults.map((result, index) => (
+                <div key={index} className="search-result">
+                  <img src={result.userProfilePicture} alt={result.uploaderName} className="search-result-profile-pic" />
+                  <div className="search-result-info">
+                    <span className="search-result-name">{result.uploaderName}</span>
+                    <span className="search-result-role">{result.role}</span>
+                    <span className="search-result-company">{result.companyName}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

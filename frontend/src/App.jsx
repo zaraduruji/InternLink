@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Welcome from './Welcome Page/welcome';
 import Login from './Login Page/Login';
 import Signup from './Signup Page/Signup';
-import { UserContext } from './UserContext'; // Ensure you have this context file
+import { UserContext } from './UserContext';
 import Home from './Home Page/Home';
 
 function App() {
