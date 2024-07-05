@@ -272,7 +272,6 @@ body {
 .light-mode .sidebar {
   border-right: 1px solid #dbdbdb;
 }
-
 .modal {
   position: fixed;
   top: 0;
@@ -289,7 +288,7 @@ body {
   background: white;
   padding: 20px;
   border-radius: 10px;
-  width: 50%; /* Reduced width */
+  width: 60%;
   max-height: 80%;
   overflow-y: auto;
 }
@@ -299,7 +298,7 @@ body {
   align-items: center;
   background-color: #fff;
   border-radius: 25px;
-  padding: 5px;
+  padding: 10px;
   width: 100%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
