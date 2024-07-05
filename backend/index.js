@@ -60,7 +60,7 @@ app.get('/api/job-listings', (req, res) => {
 
 // Search endpoint
 app.get('/api/search', (req, res) => {
-  const query = req.query.q.toLowerCase();
+  const query = req.query.q ? req.query.q.toLowerCase() : '';
   const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
   fs.readFile(jsonFilePath, 'utf8', (err, data) => {
     if (err) {
@@ -69,13 +69,14 @@ app.get('/api/search', (req, res) => {
     }
     const jobListings = JSON.parse(data);
     const results = jobListings.filter(job =>
-      job.uploaderName.toLowerCase().includes(query) ||
-      job.companyName.toLowerCase().includes(query) ||
-      job.role.toLowerCase().includes(query)
+      (job.uploaderName && job.uploaderName.toLowerCase().includes(query)) ||
+      (job.companyName && job.companyName.toLowerCase().includes(query)) ||
+      (job.role && job.role.toLowerCase().includes(query))
     );
     res.json(results);
   });
 });
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
