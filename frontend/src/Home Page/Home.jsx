@@ -11,6 +11,7 @@ const Home = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState('all');
 
   const toggleMore = () => {
     setIsMoreOpen(!isMoreOpen);
@@ -31,18 +32,22 @@ const Home = () => {
   useEffect(() => {
     if (searchTerm) {
       const results = jobListings.filter(job =>
-        job.uploaderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
+        (selectedFilter === 'all' || selectedFilter === 'people') && job.uploaderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (selectedFilter === 'all' || selectedFilter === 'jobs') && job.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (selectedFilter === 'all' || selectedFilter === 'companies') && job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setSearchResults(results);
     } else {
       setSearchResults([]);
     }
-  }, [searchTerm, jobListings]);
+  }, [searchTerm, jobListings, selectedFilter]);
+
+  const handleFilterChange = (filter) => {
+    setSelectedFilter(filter);
+  };
 
   return (
-    <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
+    <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'} ${searchModalOpen ? 'search-open' : ''}`}>
       <aside className="sidebar">
         <div className="logo-container">
           <img src={logo} alt="InternLink Logo" className="logo" />
@@ -143,33 +148,38 @@ const Home = () => {
       </aside>
 
       {searchModalOpen && (
-        <div className="modal">
-          <div className="modal-content">
-            <div className="search-bar">
-              <FontAwesomeIcon icon={faSearch} className="search-icon" />
-              <input
-                type="text"
-                className="search-input"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <button className="close-button" onClick={() => setSearchModalOpen(false)}>
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-            </div>
-            <div className="search-results">
-              {searchResults.map((result, index) => (
-                <div key={index} className="search-result">
-                  <img src={result.userProfilePicture} alt={result.uploaderName} className="search-result-profile-pic" />
-                  <div className="search-result-info">
-                    <span className="search-result-name">{result.uploaderName}</span>
-                    <span className="search-result-role">{result.role}</span>
-                    <span className="search-result-company">{result.companyName}</span>
-                  </div>
+        <div className={`search-modal ${searchModalOpen ? 'open' : ''}`}>
+          <div className="search-bar">
+            <FontAwesomeIcon icon={faSearch} className="search-icon" />
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button className="close-button" onClick={() => setSearchModalOpen(false)}>
+              <FontAwesomeIcon icon={faTimes} />
+            </button>
+          </div>
+          <div className="filter-buttons">
+            <button onClick={() => handleFilterChange('all')} className={selectedFilter === 'all' ? 'active' : ''}>All</button>
+            <button onClick={() => handleFilterChange('people')} className={selectedFilter === 'people' ? 'active' : ''}>People</button>
+            <button onClick={() => handleFilterChange('posts')} className={selectedFilter === 'posts' ? 'active' : ''}>Posts</button>
+            <button onClick={() => handleFilterChange('jobs')} className={selectedFilter === 'jobs' ? 'active' : ''}>Jobs</button>
+            <button onClick={() => handleFilterChange('companies')} className={selectedFilter === 'companies' ? 'active' : ''}>Companies</button>
+          </div>
+          <div className="search-results">
+            {searchResults.map((result, index) => (
+              <div key={index} className="search-result">
+                <img src={result.userProfilePicture} alt={result.uploaderName} className="search-result-profile-pic" />
+                <div className="search-result-info">
+                  <span className="search-result-name">{result.uploaderName}</span>
+                  <span className="search-result-role">{result.role}</span>
+                  <span className="search-result-company">{result.companyName}</span>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
