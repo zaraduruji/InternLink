@@ -19,6 +19,7 @@ model User {
   email    String @unique
   password String
   role     String
+  stories  Story[] // Relation field to Story model
 }
 
 model JobListing {
@@ -40,4 +41,13 @@ model Comment {
   timestamp   DateTime  @default(now())
   jobListing  JobListing @relation(fields: [jobListingId], references: [id])
   jobListingId Int
+}
+
+model Story {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  fileUrl    String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
 }
