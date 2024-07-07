@@ -7,6 +7,8 @@ import Sequelize from 'sequelize';
 import SequelizeStoreInit from 'connect-session-sequelize';
 import fs from 'fs';
 import path from 'path';
+import multer from 'multer';
+import { PrismaClient } from '@prisma/client';
 import router from './users.js';
 
 const app = express();
@@ -20,6 +22,10 @@ const SequelizeStore = SequelizeStoreInit(session.Store);
 const sessionStore = new SequelizeStore({
   db: sequelize,
 });
+
+const prisma = new PrismaClient();
+
+const upload = multer({ dest: 'uploads/' });
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -77,6 +83,46 @@ app.get('/api/search', (req, res) => {
   });
 });
 
+// Endpoint to upload stories
+app.post('/api/uploadStory', upload.single('story'), async (req, res) => {
+  const file = req.file;
+  const userId = req.body.userId;
+
+  if (!file) {
+    console.error('No file uploaded.');
+    return res.status(400).send('No file uploaded.');
+  }
+
+  const fileUrl = `http://localhost:${port}/uploads/${file.filename}`;
+
+  try {
+    const story = await prisma.story.create({
+      data: {
+        userId: parseInt(userId, 10),
+        fileUrl: fileUrl,
+      },
+    });
+    console.log('Story uploaded successfully:', story);
+    res.status(200).send('Story uploaded successfully!');
+  } catch (error) {
+    console.error('Error uploading story:', error);
+    res.status(500).send('Error uploading story.');
+  }
+});
+
+// Endpoint to fetch stories
+app.get('/api/stories', async (req, res) => {
+  try {
+    const stories = await prisma.story.findMany();
+    res.json(stories);
+  } catch (error) {
+    console.error('Error fetching stories:', error);
+    res.status(500).send('Error fetching stories.');
+  }
+});
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

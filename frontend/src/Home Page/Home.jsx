@@ -3,6 +3,8 @@ import './Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faHome, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH, faAdjust, faBookmark, faThumbsUp, faComment, faTimes } from '@fortawesome/free-solid-svg-icons';
 import logo from '/logo.png';
+import StoryUpload from '../StoryUpload/StoryUpload';
+import Stories from '../StoryDisplays/Stories';
 
 const Home = () => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -99,12 +101,9 @@ const Home = () => {
 
       <main className="main-content">
         <div className="stories-lineup">
-          <div className="story"></div>
-          <div className="story"></div>
-          <div className="story"></div>
-          <div className="story"></div>
-          <div className="story"></div>
+          <Stories /> {/* Displaying stories */}
         </div>
+        <StoryUpload /> {/* Uploading new stories */}
 
         <div className="posts-container">
           {jobListings.map((job, index) => (

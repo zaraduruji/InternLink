@@ -12,18 +12,22 @@ const StoryUpload = () => {
 
         const formData = new FormData();
         formData.append('story', selectedFile);
-        formData.append('userId', 1); // Assume user ID is 1 for this example
+        formData.append('userId', 1); // Assuming user ID is 1 for this example
 
-        // Make an API call to upload the file
-        const response = await fetch('/api/uploadStory', {
-            method: 'POST',
-            body: formData,
-        });
+        try {
+            const response = await fetch('http://localhost:3000/api/uploadStory', {
+                method: 'POST',
+                body: formData,
+            });
 
-        if (response.ok) {
-            alert('Story uploaded successfully!');
-        } else {
-            alert('Failed to upload story.');
+            if (response.ok) {
+                alert('Story uploaded successfully!');
+            } else {
+                alert('Failed to upload story.');
+            }
+        } catch (error) {
+            console.error('Error uploading story:', error);
+            alert('An error occurred while uploading the story.');
         }
     };
 
