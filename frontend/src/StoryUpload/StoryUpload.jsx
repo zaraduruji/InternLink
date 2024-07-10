@@ -12,7 +12,7 @@ const StoryUpload = () => {
 
         const formData = new FormData();
         formData.append('story', selectedFile);
-        formData.append('userId', 1); // Assuming user ID is 1 for this example
+        formData.append('userId', 1);
 
         try {
             const response = await fetch('http://localhost:3000/api/uploadStory', {

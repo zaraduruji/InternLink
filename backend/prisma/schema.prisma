@@ -14,40 +14,41 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  name     String
-  email    String @unique
-  password String
-  role     String
-  stories  Story[] // Relation field to Story model
+  id        Int     @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String  @unique
+  password  String
+  location  String? // Optional field
+  jobTitle  String? // Optional field
+  stories   Story[] // Relation field to Story model
 }
 
 model JobListing {
-  id                Int       @id @default(autoincrement())
-  role              String
+  id                 Int       @id @default(autoincrement())
+  role               String
   userProfilePicture String
-  imageUrl          String?
-  description       String
-  timestamp         DateTime  @default(now())
-  companyName       String
-  uploaderName      String
-  likeCount         Int?      @default(0)
-  comments          Comment[]
+  imageUrl           String?
+  description        String
+  timestamp          DateTime  @default(now())
+  companyName        String
+  uploaderName       String
+  likeCount          Int?      @default(0)
+  comments           Comment[]
 }
 
 model Comment {
-  id          Int       @id @default(autoincrement())
-  content     String
-  timestamp   DateTime  @default(now())
-  jobListing  JobListing @relation(fields: [jobListingId], references: [id])
+  id           Int        @id @default(autoincrement())
+  content      String
+  timestamp    DateTime   @default(now())
+  jobListing   JobListing @relation(fields: [jobListingId], references: [id])
   jobListingId Int
 }
 
 model Story {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  fileUrl    String
-  createdAt  DateTime @default(now())
-
-  user       User     @relation(fields: [userId], references: [id])
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  fileUrl   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }

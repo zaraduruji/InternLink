@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './Stories.css';
 
 const Stories = () => {
     const [stories, setStories] = useState([]);
@@ -11,10 +12,10 @@ const Stories = () => {
     }, []);
 
     return (
-        <div className="stories">
+        <div className="stories-container">
             {stories.map(story => (
-                <div key={story.id} className="story">
-                    <img src={story.fileUrl} alt="Story" />
+                <div key={story.id} className="story-circle">
+                    <img src={story.fileUrl} alt="Story" className="story-image" />
                 </div>
             ))}
         </div>
