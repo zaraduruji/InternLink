@@ -40,7 +40,6 @@ function Login({ setShowLoginModal, setShowSignupModal }) {
         const data = await response.json();
         const loggedInUser = data.user;
         updateUser(loggedInUser);
-        setShowLoginModal(false);
         navigate("/home");
       } else {
         setError("Login failed");
@@ -53,7 +52,6 @@ function Login({ setShowLoginModal, setShowSignupModal }) {
   }
 
   const handleSignupClick = () => {
-    setShowLoginModal(false);
     setShowSignupModal(true);
   };
 

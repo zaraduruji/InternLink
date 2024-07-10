@@ -1,8 +1,14 @@
-import React, { useState, useEffect } from 'react';
+// src/Home Page/Home.jsx
+
+import React, { useState, useEffect, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import './Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faHome, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH, faAdjust, faBookmark, faThumbsUp, faComment, faTimes } from '@fortawesome/free-solid-svg-icons';
 import logo from '/logo.png';
+import StoryUpload from '../StoryUpload/StoryUpload';
+import Stories from '../StoryDisplays/Stories';
+import { UserContext } from '../UserContext';
 
 const Home = () => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -12,6 +18,8 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [showProfilePreview, setShowProfilePreview] = useState(false); // State for profile preview
+  const { user } = useContext(UserContext);
 
   const toggleMore = () => {
     setIsMoreOpen(!isMoreOpen);
@@ -74,10 +82,28 @@ const Home = () => {
             <FontAwesomeIcon icon={faPlusSquare} className="nav-icon" />
             <span className="nav-text">Create Post</span>
           </div>
-          <div className="nav-item">
+          <Link
+            to="/profile"
+            className="nav-item"
+            onMouseEnter={() => setShowProfilePreview(true)}
+            onMouseLeave={() => setShowProfilePreview(false)}
+          >
             <FontAwesomeIcon icon={faUser} className="nav-icon" />
             <span className="nav-text">Profile</span>
-          </div>
+            {showProfilePreview && (
+              <div className="profile-preview">
+                <div className="profile-picture">
+                  <img src="/default-profile-pic.png" alt="Profile" />
+                </div>
+                <div className="profile-details">
+                  <div className="profile-name">{user.firstName} {user.lastName}</div>
+                  <div className="profile-view-button">
+                    <button onClick={() => window.location.href = '/profile'}>View Profile</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Link>
           <div className="nav-item more" onClick={toggleMore}>
             <FontAwesomeIcon icon={faEllipsisH} className="nav-icon" />
             <span className="nav-text">More</span>
@@ -99,12 +125,9 @@ const Home = () => {
 
       <main className="main-content">
         <div className="stories-lineup">
-          <div className="story"></div>
-          <div className="story"></div>
-          <div className="story"></div>
-          <div className="story"></div>
-          <div className="story"></div>
+          <Stories /> {/* Displaying stories */}
         </div>
+        <StoryUpload /> {/* Uploading new stories */}
 
         <div className="posts-container">
           {jobListings.map((job, index) => (
