@@ -56,15 +56,16 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
   };
 
   return (
-    <div className='signup-form'>
-      <h2>Make the most of your professional life</h2>
-      <form onSubmit={handleSignup}>
+    <div className='signup-modal'>
+      <h2 className='signup-title'>Make the most of your professional life</h2>
+      <form onSubmit={handleSignup} className='signup-form'>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          className='signup-input'
         />
         <input
           type="password"
@@ -72,10 +73,11 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          className='signup-input'
         />
-        {error && <div className="error">{error}</div>}
+        {error && <div className="signup-error">{error}</div>}
         <button type="submit" className='signup-button'>Agree & Join</button>
-        <p>Already on InternLink? <a href="#" onClick={handleLoginClick}>Log In</a></p>
+        <p className='signup-message'>Already on InternLink? <a href="#" onClick={handleLoginClick}>Log In</a></p>
       </form>
     </div>
   );

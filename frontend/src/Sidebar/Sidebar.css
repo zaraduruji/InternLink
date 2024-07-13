@@ -125,9 +125,6 @@
     cursor: pointer;
   }
 
-  .profile-view-button button:hover {
-    background-color: #333;
-  }
 
   .search-open .sidebar {
     width: 80px;

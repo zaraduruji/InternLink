@@ -1,41 +1,50 @@
 /* src/Login Page/Login.css */
 
-.login-form {
-  text-align: center;
+.login-modal-background {
+  /* Add any styles for the background */
 }
 
-h2 {
+.login-modal-content {
   text-align: center;
+  /* Add any additional styles for modal content */
 }
 
-.login-form h2 {
+.login-title {
   margin-bottom: 20px;
+  text-align: center;
   color: #ff5733;
 }
 
-form {
+.login-form {
   display: flex;
   flex-direction: column;
 }
 
-input {
+.login-input {
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  color: #333; /* Default color */
 }
 
-.password-container {
-  position: relative;
-}
-
-.password-container input {
-  width: 100%;
+.login-password {
+  width: 89.5%;
   padding-right: 40px;
 }
 
-.password-toggle-icon {
+.login-password-visible {
+  color: #000; /* Ensure the font color is visible */
+  background-color: #fff; /* Ensure the background color is white */
+}
+
+.login-password-container {
+  position: relative;
+}
+
+.login-password-toggle-icon {
   position: absolute;
+  color: black;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
@@ -52,18 +61,24 @@ input {
 }
 
 .login-button:hover {
-  background-color: #e14e2d;
+  background-color: #f08c76;
 }
 
-p {
+.login-signup-message {
   text-align: center;
+  color: black;
 }
 
-a {
+.login-signup-message a {
   color: #ff5733;
   text-decoration: none;
 }
 
-a:hover {
+.login-signup-message a:hover {
   text-decoration: underline;
+}
+
+.login-error {
+  color: red;
+  text-align: center;
 }

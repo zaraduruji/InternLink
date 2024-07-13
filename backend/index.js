@@ -10,6 +10,7 @@ import path from 'path';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { v2 as cloudinary } from 'cloudinary';
 
 env.config();
 
@@ -26,15 +27,23 @@ const sessionStore = new SequelizeStore({
 
 const prisma = new PrismaClient();
 
-const upload = multer({ dest: 'uploads/' });
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-// Adjust the body size limit
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(
@@ -98,7 +107,6 @@ app.post('/login', async (req, res) => {
 });
 
 app.put('/update-profile', async (req, res) => {
-  console.log(req.body)
   const { userId, firstName, lastName, location, jobTitle, about, education, profilePicture } = req.body;
 
   try {
@@ -158,12 +166,21 @@ app.post('/uploadProfilePicture', upload.single('profilePicture'), async (req, r
     return res.status(400).send('No file uploaded.');
   }
 
-  const fileUrl = `http://localhost:${port}/uploads/${file.filename}`;
-
   try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+      uploadStream.end(file.buffer);
+    });
+
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(userId, 10) },
-      data: { profilePicture: fileUrl },
+      data: { profilePicture: result.secure_url },
     });
     res.status(200).json({ user: updatedUser });
   } catch (error) {
@@ -179,13 +196,22 @@ app.post('/api/uploadStory', upload.single('story'), async (req, res) => {
     return res.status(400).send('No file uploaded.');
   }
 
-  const fileUrl = `http://localhost:${port}/uploads/${file.filename}`;
-
   try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+      uploadStream.end(file.buffer);
+    });
+
     const story = await prisma.story.create({
       data: {
         userId: parseInt(userId, 10),
-        fileUrl: fileUrl,
+        fileUrl: result.secure_url,
       },
     });
     res.status(200).send('Story uploaded successfully!');

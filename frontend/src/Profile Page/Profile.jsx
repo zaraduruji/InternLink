@@ -71,22 +71,26 @@ const Profile = () => {
   const capturePhoto = () => {
     const context = canvasRef.current.getContext('2d');
     context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-    updateUser({ ...user, profilePicture: canvasRef.current.toDataURL('image/png') });
-    saveProfile();
-    closeCameraModal();
-    closePhotoModal();
+    const dataUrl = canvasRef.current.toDataURL('image/png');
+    handlePhotoUpload(dataUrl);
   };
 
-  const handlePhotoUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateUser({ ...user, profilePicture: reader.result });
-        saveProfile();
-        closePhotoModal();
-      };
-      reader.readAsDataURL(file);
+  const handlePhotoUpload = async (imageData) => {
+    const formData = new FormData();
+    formData.append('profilePicture', imageData);
+    formData.append('userId', user.id);
+
+    try {
+      const response = await fetch('http://localhost:3000/uploadProfilePicture', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      updateUser(data.user);
+      closePhotoModal();
+      closeCameraModal();
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -120,7 +124,7 @@ const Profile = () => {
 
   const fetchUniversitySuggestions = async (query) => {
     if (!query) return;
-    const response = await fetch(`https://kgsearch.googleapis.com/v1/entities:search?query=${query}&key=AIzaSyBcZzt_bq9vIB_S_c0l-rMa-IwpEr-EqNg&limit=10&types=Organization`);
+    const response = await fetch(`https://kgsearch.googleapis.com/v1/entities:search?query=${query}&key=YOUR_API_KEY&limit=10&types=Organization`);
     const data = await response.json();
     const suggestions = data.itemListElement.map((item) => ({
       name: item.result.name,
@@ -142,40 +146,23 @@ const Profile = () => {
     setAbout(event.target.value);
   };
 
-  const saveProfile = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/update-profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          location: user.location,
-          jobTitle: user.jobTitle,
-          about: user.about,
-          education: user.education,
-          profilePicture: user.profilePicture,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
-      const data = await response.json();
-      updateUser(data.user);
-    } catch (error) {
-      console.error('Error updating profile:', error);
-    }
-  };
-
   const saveAbout = () => {
-    updateUser({ ...user, about });
-    saveProfile();
-    closeAboutModal();
+    fetch('http://localhost:3000/update-profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        about,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        updateUser(data.user);
+        closeAboutModal();
+      })
+      .catch((error) => console.error('Error:', error));
   };
 
   const saveEducationDetails = () => {
@@ -187,9 +174,22 @@ const Profile = () => {
       grade: educationDetails.grade,
       logo: educationDetails.logo
     };
-    updateUser({ ...user, education: [...(user.education || []), updatedEducation] });
-    saveProfile();
-    closeEducationModal();
+    fetch('http://localhost:3000/update-profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        education: [...(user.education || []), updatedEducation],
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        updateUser(data.user);
+        closeEducationModal();
+      })
+      .catch((error) => console.error('Error:', error));
   };
 
   const toggleDarkMode = () => {
@@ -271,7 +271,7 @@ const Profile = () => {
       >
         <h2>Add to profile</h2>
         <hr />
-        <p>Set up your profile in minutes through LinkedIn - just one click away!</p>
+        <p>Set up your profile in minutes through linkedIn - just one click away!</p>
         <button className="modal-button">LinkedIn</button>
         <h3>OR</h3>
         <p>Manual Setup</p>
@@ -299,7 +299,7 @@ const Profile = () => {
           <button className="modal-button" onClick={openCameraModal}>Use camera</button>
           <label className="modal-button upload-photo-button" htmlFor="file-upload">
             Upload photo
-            <input id="file-upload" type="file" accept="image/*" onChange={handlePhotoUpload} />
+            <input id="file-upload" type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files[0])} />
           </label>
         </div>
         <button className="modal-close" onClick={closePhotoModal}>Close</button>

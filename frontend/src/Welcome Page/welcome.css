@@ -32,7 +32,7 @@
 
 
 .welcome-text,
-.catch-phrase,
+.unique-catch-phrase,
 .buttons {
   opacity: 0;
   transition: opacity 1s ease-in-out;
@@ -66,6 +66,10 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.unique-catch-phrase {
+  color: white;
 }
 
 .login-button:hover,

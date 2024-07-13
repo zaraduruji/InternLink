@@ -56,33 +56,35 @@ function Login({ setShowLoginModal, setShowSignupModal }) {
   };
 
   return (
-    <div className="modal-background">
-      <div className="modal-content">
-        <h2>Log In to InternLink</h2>
-        <form onSubmit={handleLogin}>
+    <div className="login-modal-background">
+      <div className="login-modal-content">
+        <h2 className="login-title">Log In to InternLink</h2>
+        <form onSubmit={handleLogin} className="login-form">
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            className="login-input"
           />
-          <div className="password-container">
+          <div className="login-password-container">
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              className={`login-input login-password ${showPassword ? 'login-password-visible' : ''}`}
             />
-            <span className="password-toggle-icon" onClick={togglePasswordVisibility}>
+            <span className="login-password-toggle-icon" onClick={togglePasswordVisibility}>
               <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
             </span>
           </div>
           <button type="submit" className="login-button" disabled={loading}>Log In</button>
         </form>
-        <p>No account? <a href="#" onClick={handleSignupClick}>Sign Up</a></p>
-        {error && <p className="error">{error}</p>}
+        <p className="login-signup-message">No account? <a href="#" onClick={handleSignupClick}>Sign Up</a></p>
+        {error && <p className="login-error">{error}</p>}
       </div>
     </div>
   );
