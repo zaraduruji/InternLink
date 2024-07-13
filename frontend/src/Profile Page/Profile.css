@@ -307,3 +307,14 @@ textarea {
   resize: none;
   height: 150px;
 }
+
+/* Add this to your Profile.css */
+.connection-counter {
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: default;
+  margin-top: 10px;
+}

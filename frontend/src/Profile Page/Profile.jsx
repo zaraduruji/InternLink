@@ -1,11 +1,10 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import './Profile.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faSearch, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
-import defaultProfilePic from '../../public/defaultProfilePic.png';
 import { UserContext } from '../UserContext';
 import Modal from 'react-modal';
+import Sidebar from '../Sidebar/Sidebar';
+import SearchModal from '../SearchModal/SearchModal';
+import defaultProfilePic from '../../public/defaultProfilePic.png';
 
 const Profile = () => {
   const { user, updateUser } = useContext(UserContext);
@@ -28,6 +27,8 @@ const Profile = () => {
   const [universitySuggestions, setUniversitySuggestions] = useState([]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
 
   useEffect(() => {
     console.log('User data:', user);
@@ -70,8 +71,8 @@ const Profile = () => {
   const capturePhoto = () => {
     const context = canvasRef.current.getContext('2d');
     context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-    const dataUrl = canvasRef.current.toDataURL('image/png');
-    updateUser({ ...user, profilePicture: dataUrl });
+    updateUser({ ...user, profilePicture: canvasRef.current.toDataURL('image/png') });
+    saveProfile();
     closeCameraModal();
     closePhotoModal();
   };
@@ -82,6 +83,7 @@ const Profile = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         updateUser({ ...user, profilePicture: reader.result });
+        saveProfile();
         closePhotoModal();
       };
       reader.readAsDataURL(file);
@@ -140,8 +142,39 @@ const Profile = () => {
     setAbout(event.target.value);
   };
 
+  const saveProfile = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/update-profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          location: user.location,
+          jobTitle: user.jobTitle,
+          about: user.about,
+          education: user.education,
+          profilePicture: user.profilePicture,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const data = await response.json();
+      updateUser(data.user);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
+  };
+
   const saveAbout = () => {
     updateUser({ ...user, about });
+    saveProfile();
     closeAboutModal();
   };
 
@@ -155,47 +188,18 @@ const Profile = () => {
       logo: educationDetails.logo
     };
     updateUser({ ...user, education: [...(user.education || []), updatedEducation] });
+    saveProfile();
     closeEducationModal();
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.body.classList.toggle('light-mode');
   };
 
   return (
     <div className="profile-page">
-      <aside className="sidebar">
-        <div className="logo-container">
-          <img src="/logo.png" alt="InternLink Logo" className="logo" />
-          <span className="logo-text">InternLink</span>
-        </div>
-        <nav className="nav-menu">
-          <Link to="/home" className="nav-item">
-            <FontAwesomeIcon icon={faHome} className="nav-icon" />
-            <span className="nav-text">Home</span>
-          </Link>
-          <Link to="/search" className="nav-item">
-            <FontAwesomeIcon icon={faSearch} className="nav-icon" />
-            <span className="nav-text">Search</span>
-          </Link>
-          <Link to="/friends" className="nav-item">
-            <FontAwesomeIcon icon={faUserFriends} className="nav-icon" />
-            <span className="nav-text">Friends</span>
-          </Link>
-          <Link to="/notifications" className="nav-item">
-            <FontAwesomeIcon icon={faBell} className="nav-icon" />
-            <span className="nav-text">Notifications</span>
-          </Link>
-          <Link to="/create-post" className="nav-item">
-            <FontAwesomeIcon icon={faPlusSquare} className="nav-icon" />
-            <span className="nav-text">Create Post</span>
-          </Link>
-          <Link to="/profile" className="nav-item active">
-            <FontAwesomeIcon icon={faUser} className="nav-icon" />
-            <span className="nav-text">Profile</span>
-          </Link>
-          <Link to="/more" className="nav-item">
-            <FontAwesomeIcon icon={faEllipsisH} className="nav-icon" />
-            <span className="nav-text">More</span>
-          </Link>
-        </nav>
-      </aside>
+      <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
 
       <div className="profile-content">
         <div className="profile-header">
@@ -203,7 +207,7 @@ const Profile = () => {
             <img src={user?.profilePicture || defaultProfilePic} alt="Default Profile" />
           </div>
           <div className="profile-info">
-            <h2>{user?.name || 'Your Name'}</h2>
+            <h2>{user?.firstName || 'Your Name'} {user?.lastName}</h2>
             <p>{user?.jobTitle || 'Software Engineer'}</p>
             <p>{user?.location || 'Seattle, WA, USA'}</p>
             <div className="profile-buttons">
@@ -267,7 +271,7 @@ const Profile = () => {
       >
         <h2>Add to profile</h2>
         <hr />
-        <p>Set up your profile in minutes through linkedIn - just one click away!</p>
+        <p>Set up your profile in minutes through LinkedIn - just one click away!</p>
         <button className="modal-button">LinkedIn</button>
         <h3>OR</h3>
         <p>Manual Setup</p>
@@ -388,6 +392,8 @@ const Profile = () => {
         <button className="modal-button" onClick={saveAbout}>Save</button>
         <button className="modal-close" onClick={closeAboutModal}>Close</button>
       </Modal>
+
+      <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} darkMode={darkMode} />
     </div>
   );
 };

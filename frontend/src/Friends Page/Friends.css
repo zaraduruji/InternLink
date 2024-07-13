@@ -1,0 +1,37 @@
+.friends-page {
+    display: flex;
+  }
+
+  .friends-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 200px; /* To avoid overlapping with the sidebar */
+  }
+
+  .friends-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+  }
+
+  .tab {
+    cursor: pointer;
+    padding: 10px;
+    flex-grow: 1;
+    text-align: center;
+    border-bottom: 2px solid transparent;
+  }
+
+  .tab.active {
+    border-bottom: 2px solid #ff6600;
+  }
+
+  .friends-details {
+    padding: 20px;
+  }
+
+  .grow-connections-section, .suggested-connections-section {
+    padding: 20px;
+    border: 1px solid #333;
+    margin-bottom: 10px;
+  }
