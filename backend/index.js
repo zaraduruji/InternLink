@@ -261,12 +261,6 @@ app.post('/api/connect', async (req, res) => {
   }
 });
 
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
-
 app.post('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -275,4 +269,76 @@ app.post('/logout', (req, res) => {
     res.clearCookie('connect.sid'); // Adjust the cookie name if different
     res.status(200).send('Logged out successfully');
   });
+});
+
+// Friend request endpoints
+app.post('/api/friend-request', async (req, res) => {
+  const { userId, targetUserId } = req.body;
+  try {
+    const friendRequest = await prisma.friendRequest.create({
+      data: {
+        requesterId: parseInt(userId, 10),
+        recipientId: parseInt(targetUserId, 10),
+        status: 'PENDING',
+      },
+    });
+    res.status(200).json({ message: 'Friend request sent', friendRequest });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.put('/api/friend-request/accept', async (req, res) => {
+  const { requestId } = req.body;
+  try {
+    const friendRequest = await prisma.friendRequest.update({
+      where: { id: parseInt(requestId, 10) },
+      data: { status: 'ACCEPTED' },
+    });
+    await prisma.connection.create({
+      data: {
+        userId: friendRequest.requesterId,
+        friendId: friendRequest.recipientId,
+        status: 'CONNECTED',
+      },
+    });
+    res.status(200).json({ message: 'Friend request accepted', friendRequest });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.put('/api/friend-request/decline', async (req, res) => {
+  const { requestId } = req.body;
+  try {
+    const friendRequest = await prisma.friendRequest.update({
+      where: { id: parseInt(requestId, 10) },
+      data: { status: 'DECLINED' },
+    });
+    res.status(200).json({ message: 'Friend request declined', friendRequest });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// Fetch friend requests for a user
+app.get('/api/friend-requests', async (req, res) => {
+  const { userId } = req.query;
+  try {
+    const friendRequests = await prisma.friendRequest.findMany({
+      where: { recipientId: parseInt(userId, 10), status: 'PENDING' },
+      include: {
+        requester: true, // Include requester details
+      },
+    });
+    res.status(200).json({ friendRequests });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

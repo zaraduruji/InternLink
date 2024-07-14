@@ -65,6 +65,33 @@ const ProfileView = (props) => {
       .catch(error => console.error('Error:', error));
   };
 
+  const sendFriendRequest = async (targetUserId) => {
+    try {
+      // Making a POST request to the backend to send a friend request
+      const response = await fetch('http://localhost:3000/api/friend-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, targetUserId }), // Sending the userId of the logged-in user and the targetUserId
+      });
+
+      // Parsing the response to JSON
+      const data = await response.json();
+
+      // Checking if the response has a success message
+      if (data.message) {
+        console.log('Friend request sent:', data);
+        alert('Friend request sent'); // Alerting the user that the request was sent successfully
+      } else {
+        console.error('Error sending friend request:', data.error);
+        alert('Error sending friend request'); // Alerting the user if there was an error in sending the request
+      }
+    } catch (error) {
+      console.error('Error sending friend request:', error);
+      alert('Error sending friend request'); // Handling any errors that occur during the fetch request
+    }
+  };
+
+
   return (
     <div className="profile-page">
       <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
