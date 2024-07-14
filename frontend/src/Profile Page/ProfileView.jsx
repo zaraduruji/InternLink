@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import './Profile.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faSearch, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import defaultProfilePic from '../../public/defaultProfilePic.png';
-import Modal from 'react-modal';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
 import { UserContext } from '../UserContext';
@@ -18,6 +17,8 @@ const ProfileView = (props) => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [connectionCount, setConnectionCount] = useState(0);
+  const [pendingRequests, setPendingRequests] = useState({});
+  const [isConnected, setIsConnected] = useState(false);
 
   const fetchUser = async () => {
     fetch(`http://localhost:3000/api/users/${id}`)
@@ -41,6 +42,18 @@ const ProfileView = (props) => {
     }
   };
 
+  const checkConnectionStatus = async () => {
+    if (user && user.id) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/check-connection?userId=${loggedInUser.id}&targetUserId=${user.id}`);
+        const data = await response.json();
+        setIsConnected(data.isConnected);
+      } catch (error) {
+        console.error('Error checking connection status:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchUser();
   }, [id]);
@@ -48,6 +61,7 @@ const ProfileView = (props) => {
   useEffect(() => {
     if (user) {
       fetchConnectionCount();
+      checkConnectionStatus();
     }
   }, [user]);
 
@@ -60,63 +74,78 @@ const ProfileView = (props) => {
     document.body.classList.toggle('light-mode');
   };
 
-  const handleConnectionRequest = () => {
-    fetch('http://localhost:3000/api/connect', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId: loggedInUser.id,
-        targetUserId: user.id,
-      }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data.message);
-        // Optionally update the UI to indicate the connection request has been sent
-      })
-      .catch(error => console.error('Error:', error));
+  const handleConnectionRequest = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/connect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: loggedInUser.id,
+          targetUserId: user.id,
+        }),
+      });
+      const data = await response.json();
+      if (data.message) {
+        setPendingRequests((prev) => ({ ...prev, [user.id]: true }));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  const handleRemoveConnection = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/remove-connection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: loggedInUser.id,
+          targetUserId: user.id,
+        }),
+      });
+      const data = await response.json();
+      if (data.message) {
+        setIsConnected(false);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   const sendFriendRequest = async (targetUserId) => {
     try {
-      // Making a POST request to the backend to send a friend request
       const response = await fetch('http://localhost:3000/api/friend-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: loggedInUser.id, targetUserId }), // Sending the userId of the logged-in user and the targetUserId
+        body: JSON.stringify({ userId: loggedInUser.id, targetUserId }),
       });
-
-      // Parsing the response to JSON
       const data = await response.json();
-
-      // Checking if the response has a success message
       if (data.message) {
-        console.log('Friend request sent:', data);
-        alert('Friend request sent'); // Alerting the user that the request was sent successfully
+        setPendingRequests((prev) => ({ ...prev, [targetUserId]: true }));
       } else {
         console.error('Error sending friend request:', data.error);
-        alert('Error sending friend request'); // Alerting the user if there was an error in sending the request
       }
     } catch (error) {
       console.error('Error sending friend request:', error);
-      alert('Error sending friend request'); // Handling any errors that occur during the fetch request
     }
   };
 
   const UserProfile = ({ targetUser }) => {
-    const isConnected = isAlreadyConnected(targetUser.id);
+    const isPending = pendingRequests[targetUser.id];
+    const isConnected = targetUser.isConnected; // Assuming you have the connection status for each user
 
     return (
       <div>
         <h2>{targetUser.firstName} {targetUser.lastName}</h2>
         <p>{targetUser.jobTitle}</p>
         <button
-          onClick={() => sendFriendRequest(targetUser.id)}
-          disabled={isConnected}
+          onClick={() => isConnected ? handleRemoveConnection(targetUser.id) : sendFriendRequest(targetUser.id)}
         >
-          {isConnected ? 'Connected' : 'Connect+'}
+          {isConnected ? 'Remove Connection' : isPending ? 'Request Pending' : 'Connect+'}
         </button>
       </div>
     );
@@ -141,7 +170,13 @@ const ProfileView = (props) => {
               {loggedInUser?.id === user?.id ? (
                 <p> Viewing your own public profile <Link to={"/profile"} >Go to editable profile</Link></p>
               ) : (
-                <button className="profile-button" onClick={handleConnectionRequest}>Connection+</button>
+                isConnected ? (
+                  <button className="profile-button" onClick={handleRemoveConnection}>Remove Connection</button>
+                ) : (
+                  <button className="profile-button" onClick={handleConnectionRequest}>
+                    {pendingRequests[user?.id] ? 'Request Pending' : 'Connect+'}
+                  </button>
+                )
               )}
             </div>
             {loggedInUser?.id === user?.id && (

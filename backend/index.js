@@ -438,6 +438,57 @@ app.get('/api/friend-requests/:userId', async (req, res) => {
   }
 });
 
+// Endpoint to check if two users are connected
+app.get('/api/check-connection', async (req, res) => {
+  const { userId, targetUserId } = req.query;
+  try {
+    const connection = await prisma.connection.findFirst({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+            status: 'CONNECTED',
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+            status: 'CONNECTED',
+          },
+        ],
+      },
+    });
+
+    res.status(200).json({ isConnected: !!connection });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// Endpoint to remove a connection
+app.post('/api/remove-connection', async (req, res) => {
+  const { userId, targetUserId } = req.body;
+  try {
+    await prisma.connection.deleteMany({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+          },
+        ],
+      },
+    });
+    res.status(200).json({ message: 'Connection removed' });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.listen(port, () => {
