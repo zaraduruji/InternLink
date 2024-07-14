@@ -321,17 +321,19 @@ app.put('/api/friend-request/decline', async (req, res) => {
   }
 });
 
-// Fetch friend requests for a user
-app.get('/api/friend-requests', async (req, res) => {
-  const { userId } = req.query;
+// Endpoint to get connections count
+app.get('/api/users/:id/connections-count', async (req, res) => {
+  const { id } = req.params;
   try {
-    const friendRequests = await prisma.friendRequest.findMany({
-      where: { recipientId: parseInt(userId, 10), status: 'PENDING' },
-      include: {
-        requester: true, // Include requester details
-      },
+    const count = await prisma.connection.count({
+      where: {
+        OR: [
+          { userId: parseInt(id, 10), status: 'CONNECTED' },
+          { friendId: parseInt(id, 10), status: 'CONNECTED' }
+        ]
+      }
     });
-    res.status(200).json({ friendRequests });
+    res.status(200).json({ count });
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }
