@@ -12,7 +12,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model User {
   id                       Int             @id @default(autoincrement())
   email                    String          @unique
@@ -22,13 +21,44 @@ model User {
   location                 String?
   jobTitle                 String?
   about                    String?
-  education                Json?
+  education                Education[]
+  experience               Experience[]
+  skills                   Skill[]
   profilePicture           String?
   connections              Connection[]    @relation("UserConnections")
   friendConnections        Connection[]    @relation("UserFriendConnections")
   userFriendRequests       FriendRequest[] @relation("Requesters")
   receivedFriendRequests   FriendRequest[] @relation("Recipients")
   story                    Story[]         @relation("userStory")
+}
+
+model Education {
+  id        Int      @id @default(autoincrement())
+  school    String
+  degree    String
+  startDate DateTime
+  endDate   DateTime
+  grade     String
+  logo      String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Experience {
+  id        Int      @id @default(autoincrement())
+  company   String
+  position  String
+  startDate DateTime
+  endDate   DateTime
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Skill {
+  id     Int    @id @default(autoincrement())
+  name   String
+  userId Int
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Connection {

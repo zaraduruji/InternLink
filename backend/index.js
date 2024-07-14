@@ -266,3 +266,13 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+app.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send('Failed to log out');
+    }
+    res.clearCookie('connect.sid'); // Adjust the cookie name if different
+    res.status(200).send('Logged out successfully');
+  });
+});

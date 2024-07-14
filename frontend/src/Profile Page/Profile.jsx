@@ -122,6 +122,23 @@ const Profile = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (response.ok) {
+        window.location.href = '/';
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+
   const fetchUniversitySuggestions = async (query) => {
     if (!query) return;
     const response = await fetch(`https://kgsearch.googleapis.com/v1/entities:search?query=${query}&key=YOUR_API_KEY&limit=10&types=Organization`);
@@ -213,6 +230,7 @@ const Profile = () => {
             <div className="profile-buttons">
               <button className="profile-button">Contact info</button>
               <button className="profile-button" onClick={openModal}>Add profile section</button>
+              <button className="profile-button" onClick={handleLogout}>Logout</button>
             </div>
           </div>
         </div>
