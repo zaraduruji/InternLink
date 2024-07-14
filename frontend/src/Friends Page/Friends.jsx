@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import './Friends.css';
 import { UserContext } from '../UserContext';
 import Sidebar from '../Sidebar/Sidebar';
@@ -8,50 +9,63 @@ const Friends = () => {
   const { user } = useContext(UserContext);
   const [activeTab, setActiveTab] = useState('growConnections');
   const [friendRequests, setFriendRequests] = useState([]);
-  const [suggestedConnections, setSuggestedConnections] = useState([]);
-
-  useEffect(() => {
-    // Fetch friend requests
-    fetch(`http://localhost:3000/api/friend-requests?userId=${user.id}`)
-      .then((response) => response.json())
-      .then((data) => setFriendRequests(data.friendRequests))
-      .catch((error) => console.error('Error fetching friend requests:', error));
-
-    // Fetch suggested connections (you might need to implement this API)
-    fetch(`http://localhost:3000/api/suggested-connections?userId=${user.id}`)
-      .then((response) => response.json())
-      .then((data) => setSuggestedConnections(data.suggestedConnections))
-      .catch((error) => console.error('Error fetching suggested connections:', error));
-  }, [user.id]);
-
-  const handleAccept = (requestId) => {
-    fetch('http://localhost:3000/api/friend-request/accept', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requestId }),
-    })
-      .then((response) => response.json())
-      .then(() => {
-        setFriendRequests(friendRequests.filter((request) => request.id !== requestId));
-      })
-      .catch((error) => console.error('Error accepting friend request:', error));
-  };
-
-  const handleDecline = (requestId) => {
-    fetch('http://localhost:3000/api/friend-request/decline', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requestId }),
-    })
-      .then((response) => response.json())
-      .then(() => {
-        setFriendRequests(friendRequests.filter((request) => request.id !== requestId));
-      })
-      .catch((error) => console.error('Error declining friend request:', error));
-  };
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    fetchFriendRequests();
+  }, []);
+
+  const fetchFriendRequests = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/friend-requests/${user.id}`);
+      const data = await response.json();
+      setFriendRequests(data);
+    } catch (error) {
+      console.error('Error fetching friend requests:', error);
+    }
+  };
+
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/friend-request/accept', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestId }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        fetchFriendRequests(); // Refresh the friend requests list
+      } else {
+        console.error('Error accepting friend request:', data);
+      }
+    } catch (error) {
+      console.error('Error accepting friend request:', error);
+    }
+  };
+
+  const handleDeclineRequest = async (requestId) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/friend-request/decline', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestId }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        fetchFriendRequests(); // Refresh the friend requests list
+      } else {
+        console.error('Error declining friend request:', data);
+      }
+    } catch (error) {
+      console.error('Error declining friend request:', error);
+    }
   };
 
   return (
@@ -71,22 +85,20 @@ const Friends = () => {
           {activeTab === 'growConnections' ? (
             <div className="grow-connections-section">
               <h3>Friend Requests</h3>
-              {friendRequests.length === 0 ? (
-                <p>No friend requests</p>
-              ) : (
-                friendRequests.map((request) => (
-                  <div key={request.id} className="friend-request">
-                    <p>{request.requester.firstName} {request.requester.lastName}</p>
-                    <button onClick={() => handleAccept(request.id)}>✔</button>
-                    <button onClick={() => handleDecline(request.id)}>✖</button>
-                  </div>
-                ))
-              )}
+              <ul>
+                {friendRequests.map((request) => (
+                  <li key={request.id}>
+                    {request.requester.firstName} {request.requester.lastName}
+                    <button onClick={() => handleAcceptRequest(request.id)}>✔</button>
+                    <button onClick={() => handleDeclineRequest(request.id)}>✖</button>
+                  </li>
+                ))}
+              </ul>
             </div>
           ) : (
             <div className="suggested-connections-section">
               <h3>Suggested Connections</h3>
-              {/* Render suggested connections here */}
+              {/* Add your code for handling suggested connections here */}
             </div>
           )}
         </div>

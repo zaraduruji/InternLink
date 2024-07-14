@@ -245,17 +245,58 @@ app.get('/api/users/:id', async (req, res) => {
   }
 });
 
+// Check if users are already connected before creating a new friend request
 app.post('/api/connect', async (req, res) => {
   const { userId, targetUserId } = req.body;
   try {
-    await prisma.friendRequest.create({
+    const existingConnection = await prisma.connection.findFirst({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+            status: 'CONNECTED',
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+            status: 'CONNECTED',
+          },
+        ],
+      },
+    });
+
+    if (existingConnection) {
+      return res.status(400).json({ message: 'You are already connected with this user' });
+    }
+
+    const existingFriendRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          {
+            requesterId: parseInt(userId, 10),
+            recipientId: parseInt(targetUserId, 10),
+          },
+          {
+            requesterId: parseInt(targetUserId, 10),
+            recipientId: parseInt(userId, 10),
+          },
+        ],
+      },
+    });
+
+    if (existingFriendRequest) {
+      return res.status(400).json({ message: 'A friend request is already pending with this user' });
+    }
+
+    const friendRequest = await prisma.friendRequest.create({
       data: {
         requesterId: parseInt(userId, 10),
         recipientId: parseInt(targetUserId, 10),
         status: 'PENDING',
       },
     });
-    res.status(200).json({ message: 'Connection request sent' });
+    res.status(200).json({ message: 'Connection request sent', friendRequest });
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }
@@ -275,6 +316,46 @@ app.post('/logout', (req, res) => {
 app.post('/api/friend-request', async (req, res) => {
   const { userId, targetUserId } = req.body;
   try {
+    const existingConnection = await prisma.connection.findFirst({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+            status: 'CONNECTED',
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+            status: 'CONNECTED',
+          },
+        ],
+      },
+    });
+
+    if (existingConnection) {
+      return res.status(400).json({ message: 'You are already connected with this user' });
+    }
+
+    const existingFriendRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          {
+            requesterId: parseInt(userId, 10),
+            recipientId: parseInt(targetUserId, 10),
+          },
+          {
+            requesterId: parseInt(targetUserId, 10),
+            recipientId: parseInt(userId, 10),
+          },
+        ],
+      },
+    });
+
+    if (existingFriendRequest) {
+      return res.status(400).json({ message: 'A friend request is already pending with this user' });
+    }
+
     const friendRequest = await prisma.friendRequest.create({
       data: {
         requesterId: parseInt(userId, 10),
@@ -334,6 +415,24 @@ app.get('/api/users/:id/connections-count', async (req, res) => {
       }
     });
     res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.get('/api/friend-requests/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const friendRequests = await prisma.friendRequest.findMany({
+      where: {
+        recipientId: parseInt(userId, 10),
+        status: 'PENDING',
+      },
+      include: {
+        requester: true,
+      },
+    });
+    res.status(200).json(friendRequests);
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }

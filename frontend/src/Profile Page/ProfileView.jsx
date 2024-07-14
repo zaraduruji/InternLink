@@ -20,7 +20,7 @@ const ProfileView = (props) => {
   const [connectionCount, setConnectionCount] = useState(0);
 
   const fetchUser = async () => {
-    fetch('http://localhost:3000/api/users/' + id)
+    fetch(`http://localhost:3000/api/users/${id}`)
       .then((response) => response.json())
       .then((data) => {
         setUser(data);
@@ -29,12 +29,26 @@ const ProfileView = (props) => {
       .catch((error) => console.error(error));
   };
 
+  const fetchConnectionCount = async () => {
+    if (user && user.id) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/users/${user.id}/connections-count`);
+        const data = await response.json();
+        setConnectionCount(data.count);
+      } catch (error) {
+        console.error('Error fetching connection count:', error);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchUser();
   }, [id]);
 
   useEffect(() => {
-    console.log('User data:', user);
+    if (user) {
+      fetchConnectionCount();
+    }
   }, [user]);
 
   const handleTabClick = (tab) => {
@@ -71,7 +85,7 @@ const ProfileView = (props) => {
       const response = await fetch('http://localhost:3000/api/friend-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, targetUserId }), // Sending the userId of the logged-in user and the targetUserId
+        body: JSON.stringify({ userId: loggedInUser.id, targetUserId }), // Sending the userId of the logged-in user and the targetUserId
       });
 
       // Parsing the response to JSON
@@ -91,6 +105,22 @@ const ProfileView = (props) => {
     }
   };
 
+  const UserProfile = ({ targetUser }) => {
+    const isConnected = isAlreadyConnected(targetUser.id);
+
+    return (
+      <div>
+        <h2>{targetUser.firstName} {targetUser.lastName}</h2>
+        <p>{targetUser.jobTitle}</p>
+        <button
+          onClick={() => sendFriendRequest(targetUser.id)}
+          disabled={isConnected}
+        >
+          {isConnected ? 'Connected' : 'Connect+'}
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="profile-page">
@@ -102,9 +132,10 @@ const ProfileView = (props) => {
             <img src={user?.profilePicture || defaultProfilePic} alt="Default Profile" />
           </div>
           <div className="profile-info">
-          <h2>{user?.firstName || 'Your Name'} {user?.lastName}</h2>
+            <h2>{user?.firstName || 'Your Name'} {user?.lastName}</h2>
             <p>{user?.jobTitle || 'Software Engineer'}</p>
             <p>{user?.location || 'Seattle, WA, USA'}</p>
+            <p>{connectionCount} Connections</p> {/* Display connections count */}
             <div className="profile-buttons">
               <button className="profile-button">Contact info</button>
               {loggedInUser?.id === user?.id ? (
