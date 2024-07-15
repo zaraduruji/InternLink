@@ -61,6 +61,15 @@ model Skill {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Notification {
+  id        Int      @id @default(autoincrement())
+  message   String
+  read      Boolean  @default(false)
+  deleted   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+
 model Connection {
   id           Int    @id @default(autoincrement())
   userId       Int
