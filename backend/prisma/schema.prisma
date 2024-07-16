@@ -69,7 +69,6 @@ model Notification {
   createdAt DateTime @default(now())
 }
 
-
 model Connection {
   id           Int    @id @default(autoincrement())
   userId       Int

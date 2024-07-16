@@ -1,22 +1,65 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import './Friends.css';
+import { gql, useSubscription, useMutation } from '@apollo/client';
 import { UserContext } from '../UserContext';
+import './Friends.css';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
+
+const FRIEND_REQUEST_RECEIVED_SUBSCRIPTION = gql`
+  subscription FriendRequestReceived($userId: Int!) {
+    friendRequestReceived(userId: $userId) {
+      id
+      content
+      createdAt
+      friendRequestId
+    }
+  }
+`;
+
+const ACCEPT_FRIEND_REQUEST_MUTATION = gql`
+  mutation AcceptFriendRequest($requestId: Int!) {
+    acceptFriendRequest(requestId: $requestId) {
+      id
+      status
+    }
+  }
+`;
+
+const DECLINE_FRIEND_REQUEST_MUTATION = gql`
+  mutation DeclineFriendRequest($requestId: Int!) {
+    declineFriendRequest(requestId: $requestId) {
+      id
+      status
+    }
+  }
+`;
 
 const Friends = () => {
   const { user } = useContext(UserContext);
   const [activeTab, setActiveTab] = useState('growConnections');
   const [friendRequests, setFriendRequests] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
 
+  const { data, loading, error } = useSubscription(FRIEND_REQUEST_RECEIVED_SUBSCRIPTION, {
+    variables: { userId: user?.id },
+  });
+
+  const [acceptFriendRequest] = useMutation(ACCEPT_FRIEND_REQUEST_MUTATION);
+  const [declineFriendRequest] = useMutation(DECLINE_FRIEND_REQUEST_MUTATION);
+
   useEffect(() => {
     fetchFriendRequests();
   }, []);
+
+  useEffect(() => {
+    if (data) {
+      setNotifications([...notifications, data.friendRequestReceived]);
+    }
+  }, [data]);
 
   const fetchFriendRequests = async () => {
     try {
@@ -30,19 +73,8 @@ const Friends = () => {
 
   const handleAcceptRequest = async (requestId) => {
     try {
-      const response = await fetch('http://localhost:3000/api/friend-request/accept', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ requestId }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        fetchFriendRequests(); // Refresh the friend requests list
-      } else {
-        console.error('Error accepting friend request:', data);
-      }
+      await acceptFriendRequest({ variables: { requestId } });
+      fetchFriendRequests(); // Refresh the friend requests list
     } catch (error) {
       console.error('Error accepting friend request:', error);
     }
@@ -50,19 +82,8 @@ const Friends = () => {
 
   const handleDeclineRequest = async (requestId) => {
     try {
-      const response = await fetch('http://localhost:3000/api/friend-request/decline', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ requestId }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        fetchFriendRequests(); // Refresh the friend requests list
-      } else {
-        console.error('Error declining friend request:', data);
-      }
+      await declineFriendRequest({ variables: { requestId } });
+      fetchFriendRequests(); // Refresh the friend requests list
     } catch (error) {
       console.error('Error declining friend request:', error);
     }
@@ -101,6 +122,18 @@ const Friends = () => {
               {/* Add your code for handling suggested connections here */}
             </div>
           )}
+        </div>
+        <div className="notifications-section">
+          <h3>Notifications</h3>
+          <ul>
+            {notifications.map((notification) => (
+              <li key={notification.id}>
+                {notification.content} - {new Date(notification.createdAt).toLocaleString()}
+                <button onClick={() => handleAcceptRequest(notification.friendRequestId)}>Accept</button>
+                <button onClick={() => handleDeclineRequest(notification.friendRequestId)}>Decline</button>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

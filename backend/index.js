@@ -11,6 +11,10 @@ import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from 'cloudinary';
+import { createYoga, createPubSub } from 'graphql-yoga';
+import typeDefs from './src/graphql/schemas/typeDefs.js';
+import resolvers from './src/graphql/resolvers/index.js';
+import { createServer } from 'node:http';
 
 env.config();
 
@@ -383,6 +387,21 @@ app.put('/api/friend-request/accept', async (req, res) => {
         status: 'CONNECTED',
       },
     });
+
+    const notification = {
+      id: notificationIdCounter++,
+      userId: friendRequest.requesterId,
+      friendRequestId: friendRequest.id,
+      content: `Your friend request has been accepted by user ${friendRequest.recipientId}`,
+      createdAt: new Date().toISOString(),
+      read: false,
+      deleted: false,
+      type: 'FRIEND_REQUEST_ANSWERED',
+    };
+
+    notifications.push(notification);
+    pubsub.publish('FRIEND_REQUEST_ANSWERED', { friendRequestAnswered: notification });
+
     res.status(200).json({ message: 'Friend request accepted', friendRequest });
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
@@ -396,6 +415,21 @@ app.put('/api/friend-request/decline', async (req, res) => {
       where: { id: parseInt(requestId, 10) },
       data: { status: 'DECLINED' },
     });
+
+    const notification = {
+      id: notificationIdCounter++,
+      userId: friendRequest.requesterId,
+      friendRequestId: friendRequest.id,
+      content: `Your friend request has been declined by user ${friendRequest.recipientId}`,
+      createdAt: new Date().toISOString(),
+      read: false,
+      deleted: false,
+      type: 'FRIEND_REQUEST_ANSWERED',
+    };
+
+    notifications.push(notification);
+    pubsub.publish('FRIEND_REQUEST_ANSWERED', { friendRequestAnswered: notification });
+
     res.status(200).json({ message: 'Friend request declined', friendRequest });
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
@@ -491,6 +525,26 @@ app.post('/api/remove-connection', async (req, res) => {
 
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// GraphQL Yoga setup
+const pubsub = createPubSub();
+let notificationIdCounter = 1;
+let notifications = [];
+
+const yoga = createYoga({
+  schema: {
+    typeDefs,
+    resolvers,
+  },
+  context: {
+    prisma,
+    pubsub,
+    notifications,
+    notificationIdCounter,
+  },
+});
+
+const server = createServer(yoga)
+
+server.listen(3000, () => {
+  console.info('Server is running on http://localhost:3000/graphql')
 });
