@@ -24,6 +24,7 @@ model User {
   education                Education[]
   experience               Experience[]
   skills                   Skill[]
+  notifications            Notification[]
   profilePicture           String?
   connections              Connection[]    @relation("UserConnections")
   friendConnections        Connection[]    @relation("UserFriendConnections")
@@ -63,10 +64,12 @@ model Skill {
 
 model Notification {
   id        Int      @id @default(autoincrement())
-  message   String
-  read      Boolean  @default(false)
-  deleted   Boolean  @default(false)
+  userId    Int
+  type      String
+  content   String
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Connection {

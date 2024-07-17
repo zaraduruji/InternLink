@@ -1,0 +1,26 @@
+type Query {
+  getNotifications(userId: Int!): [Notification!]!
+}
+
+type Mutation {
+  createFriendRequest(requesterId: Int!, recipientId: Int!): FriendRequest!
+  acceptFriendRequest(requestId: Int!): FriendRequest!
+  declineFriendRequest(requestId: Int!): FriendRequest!
+  markNotificationAsRead(notificationId: Int!): Notification!
+}
+
+type Notification {
+  id: Int!
+  userId: Int!
+  type: String!
+  content: String!
+  isRead: Boolean!
+  createdAt: String!
+}
+
+type FriendRequest {
+  id: Int!
+  requesterId: Int!
+  recipientId: Int!
+  status: String!
+}
