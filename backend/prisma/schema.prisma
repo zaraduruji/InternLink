@@ -31,6 +31,7 @@ model User {
   userFriendRequests       FriendRequest[] @relation("Requesters")
   receivedFriendRequests   FriendRequest[] @relation("Recipients")
   story                    Story[]         @relation("userStory")
+  connectionCount Int @default(0)
 }
 
 model Education {
@@ -63,14 +64,17 @@ model Skill {
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  type      String
-  content   String
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  type            String
+  content         String
+  isRead          Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id])
+  friendRequestId Int?
+  friendRequest   FriendRequest? @relation(fields: [friendRequestId], references: [id])
 }
+
 
 model Connection {
   id           Int    @id @default(autoincrement())
@@ -82,12 +86,13 @@ model Connection {
 }
 
 model FriendRequest {
-  id        Int    @id @default(autoincrement())
-  requesterId Int
-  recipientId Int
-  status    String
-  requester User   @relation("Requesters", fields: [requesterId], references: [id], onDelete: Cascade)
-  recipient User   @relation("Recipients", fields: [recipientId], references: [id], onDelete: Cascade)
+  id           Int           @id @default(autoincrement())
+  requesterId  Int
+  recipientId  Int
+  status       String
+  requester    User          @relation("Requesters", fields: [requesterId], references: [id], onDelete: Cascade)
+  recipient    User          @relation("Recipients", fields: [recipientId], references: [id], onDelete: Cascade)
+  notifications Notification[]
 }
 
 model JobListing {

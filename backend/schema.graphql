@@ -16,6 +16,7 @@ type Notification {
   content: String!
   isRead: Boolean!
   createdAt: String!
+  friendRequestId: Int
 }
 
 type FriendRequest {
@@ -23,4 +24,13 @@ type FriendRequest {
   requesterId: Int!
   recipientId: Int!
   status: String!
+}
+
+type User {
+  id: Int!
+  email: String!
+  firstName: String!
+  lastName: String!
+  connectionCount: Int!
+  # Add other fields as needed
 }

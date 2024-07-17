@@ -1,9 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { UserContext } from '../UserContext';
 
-
-// GraphQL queries and mutations
 const GET_NOTIFICATIONS = gql`
   query GetNotifications($userId: Int!) {
     getNotifications(userId: $userId) {
@@ -12,6 +10,7 @@ const GET_NOTIFICATIONS = gql`
       content
       isRead
       createdAt
+      friendRequestId
     }
   }
 `;
@@ -44,37 +43,54 @@ const DECLINE_FRIEND_REQUEST = gql`
 `;
 
 function Notifications() {
-  const { user } = useContext(UserContext);
+  const { user, updateUser } = useContext(UserContext);
   const { loading, error, data, refetch } = useQuery(GET_NOTIFICATIONS, {
     variables: { userId: user.id },
   });
-
   const [markAsRead] = useMutation(MARK_NOTIFICATION_AS_READ);
   const [acceptFriendRequest] = useMutation(ACCEPT_FRIEND_REQUEST);
   const [declineFriendRequest] = useMutation(DECLINE_FRIEND_REQUEST);
+  const [processedRequests, setProcessedRequests] = useState(new Set());
 
   const handleMarkAsRead = async (notificationId) => {
     try {
       await markAsRead({ variables: { notificationId } });
-      refetch(); // Refetch notifications to update the UI
+      refetch();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
   };
 
-  const handleAcceptFriendRequest = async (requestId) => {
+  const refetchUser = async () => {
     try {
-      await acceptFriendRequest({ variables: { requestId } });
-      refetch(); // Refetch notifications to update the UI
+      const response = await fetch(`http://localhost:3000/api/users/${user.id}`);
+      const data = await response.json();
+      updateUser(data);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+
+  const handleAcceptFriendRequest = async (notificationId, friendRequestId) => {
+    if (processedRequests.has(friendRequestId)) return;
+    try {
+      await acceptFriendRequest({ variables: { requestId: friendRequestId } });
+      setProcessedRequests((prev) => new Set(prev).add(friendRequestId));
+      await handleMarkAsRead(notificationId);
+      refetch();
+      refetchUser();  // Refetch user data to update connection count
     } catch (error) {
       console.error('Error accepting friend request:', error);
     }
   };
 
-  const handleDeclineFriendRequest = async (requestId) => {
+  const handleDeclineFriendRequest = async (notificationId, friendRequestId) => {
+    if (processedRequests.has(friendRequestId)) return;
     try {
-      await declineFriendRequest({ variables: { requestId } });
-      refetch(); // Refetch notifications to update the UI
+      await declineFriendRequest({ variables: { requestId: friendRequestId } });
+      setProcessedRequests((prev) => new Set(prev).add(friendRequestId));
+      await handleMarkAsRead(notificationId);
+      refetch();
     } catch (error) {
       console.error('Error declining friend request:', error);
     }
@@ -92,14 +108,10 @@ function Notifications() {
         data.getNotifications.map((notification) => (
           <div key={notification.id} className={`notification ${notification.isRead ? 'read' : 'unread'}`}>
             <p className="notification-content">{notification.content}</p>
-            <p className="notification-type">Type: {notification.type}</p>
-            <p className="notification-date">
-              Date: {new Date(notification.createdAt).toLocaleDateString()}
-            </p>
-            {notification.type === 'FRIEND_REQUEST' && !notification.isRead && (
+            {notification.type === 'FRIEND_REQUEST' && !notification.isRead && !processedRequests.has(notification.friendRequestId) && (
               <div className="friend-request-actions">
-                <button onClick={() => handleAcceptFriendRequest(notification.id)}>Accept</button>
-                <button onClick={() => handleDeclineFriendRequest(notification.id)}>Decline</button>
+                <button onClick={() => handleAcceptFriendRequest(notification.id, notification.friendRequestId)}>Accept</button>
+                <button onClick={() => handleDeclineFriendRequest(notification.id, notification.friendRequestId)}>Decline</button>
               </div>
             )}
             {!notification.isRead && (

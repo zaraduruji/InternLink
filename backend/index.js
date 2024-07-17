@@ -81,31 +81,45 @@ const resolvers = {
       return prisma.notification.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
+        include: { friendRequest: true },
       });
     },
   },
   Mutation: {
     createFriendRequest: async (_, { requesterId, recipientId }) => {
+      const requester = await prisma.user.findUnique({
+        where: { id: requesterId },
+        select: { firstName: true, lastName: true }
+      });
+
       const friendRequest = await prisma.friendRequest.create({
         data: {
           requesterId,
           recipientId,
           status: 'PENDING',
-        },
-      });
-
-      await prisma.notification.create({
-        data: {
-          userId: recipientId,
-          type: 'FRIEND_REQUEST',
-          content: `You have a new friend request from user ${requesterId}`,
+          notifications: {
+            create: {
+              userId: recipientId,
+              type: 'FRIEND_REQUEST',
+              content: `You have a new friend request from ${requester.firstName} ${requester.lastName}`,
+            }
+          }
         },
       });
 
       return friendRequest;
     },
     acceptFriendRequest: async (_, { requestId }) => {
-      const friendRequest = await prisma.friendRequest.update({
+      const friendRequest = await prisma.friendRequest.findUnique({
+        where: { id: requestId },
+        include: { requester: true, recipient: true }
+      });
+
+      if (!friendRequest) {
+        throw new Error('Friend request not found');
+      }
+
+      await prisma.friendRequest.update({
         where: { id: requestId },
         data: { status: 'ACCEPTED' },
       });
@@ -118,12 +132,24 @@ const resolvers = {
         },
       });
 
+      // Create notification for the requester
       await prisma.notification.create({
         data: {
           userId: friendRequest.requesterId,
           type: 'FRIEND_REQUEST_ACCEPTED',
-          content: `User ${friendRequest.recipientId} accepted your friend request`,
+          content: `${friendRequest.recipient.firstName} ${friendRequest.recipient.lastName} accepted your friend request`,
+          isRead: false,
         },
+      });
+
+      // Update connection count for both users
+      await prisma.user.update({
+        where: { id: friendRequest.requesterId },
+        data: { connectionCount: { increment: 1 } }
+      });
+      await prisma.user.update({
+        where: { id: friendRequest.recipientId },
+        data: { connectionCount: { increment: 1 } }
       });
 
       return friendRequest;
@@ -351,6 +377,61 @@ app.post('/api/send-friend-request', async (req, res) => {
   }
 });
 
+app.get('/api/connections/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const connections = await prisma.connection.findMany({
+      where: {
+        OR: [
+          { userId: parseInt(userId, 10) },
+          { friendId: parseInt(userId, 10) },
+        ],
+      },
+      include: {
+        user: true,
+        friend: true,
+      },
+    });
+
+    // Format the response to return the relevant user data
+    const formattedConnections = connections.map((connection) => {
+      const isRequester = connection.userId === parseInt(userId, 10);
+      return {
+        id: connection.id,
+        friendId: isRequester ? connection.friendId : connection.userId,
+        friend: isRequester ? connection.friend : connection.user,
+      };
+    });
+
+    res.json(formattedConnections);
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.delete('/api/connections/:userId/:friendId', async (req, res) => {
+  const { userId, friendId } = req.params;
+  try {
+    await prisma.connection.deleteMany({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(friendId, 10),
+          },
+          {
+            userId: parseInt(friendId, 10),
+            friendId: parseInt(userId, 10),
+          },
+        ],
+      },
+    });
+    res.status(200).json({ message: 'Connection removed successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
 app.post('/api/uploadStory', upload.single('story'), async (req, res) => {
   const file = req.file;
   const userId = req.body.userId;
@@ -403,6 +484,23 @@ app.get('/api/users/:id', async (req, res) => {
     } else {
       res.status(404).json({ message: 'User not found' });
     }
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.get('/api/users/:id/connections-count', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const connectionCount = await prisma.connection.count({
+      where: {
+        OR: [
+          { userId: parseInt(id, 10) },
+          { friendId: parseInt(id, 10) },
+        ],
+      },
+    });
+    res.json({ count: connectionCount });
   } catch (error) {
     res.status(500).json({ error: 'Something went wrong' });
   }
