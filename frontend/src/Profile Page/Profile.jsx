@@ -101,6 +101,21 @@ const Profile = () => {
     }
   };
 
+  const refetchConnectionCount = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/${user.id}/connections-count`);
+      const data = await response.json();
+      setConnectionsCount(data.count);
+    } catch (error) {
+      console.error('Error fetching connections count:', error);
+    }
+  };
+
+  useEffect(() => {
+    console.log('User data:', user);
+    refetchConnectionCount();
+  }, [user]);
+
   const openEducationModal = () => {
     setEducationModalIsOpen(true);
   };

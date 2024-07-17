@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ApolloProvider, InMemoryCache, ApolloClient } from '@apollo/client';
+import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
 import Welcome from './Welcome Page/welcome';
 import Login from './Login Page/Login';
 import Signup from './Signup Page/Signup';
@@ -12,11 +12,12 @@ import ProfileJobTitle from './ProfileSetup/ProfileJobTitle';
 import Profile from './Profile Page/Profile';
 import ProfileView from './Profile Page/ProfileView';
 import Friends from './Friends Page/Friends';
-import NotificationCenter from './Notifications/NotificationCenter';
+import Notifications from './Notifications Page/Notifications.jsx';
 
+// Create an instance of ApolloClient
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql', // Ensure this matches your server URL
-  cache: new InMemoryCache(),
+  uri: 'http://localhost:3000/graphql', // Your backend GraphQL endpoint
+  cache: new InMemoryCache()
 });
 
 function App() {
@@ -53,7 +54,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:id" element={<ProfileView />} />
             <Route path="/friends" element={<Friends />} />
-            <Route path="/notifications" element={<NotificationCenter />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Routes>
         </Router>
       </UserContext.Provider>
