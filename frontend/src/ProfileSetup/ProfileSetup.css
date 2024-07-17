@@ -28,7 +28,7 @@ body{
   }
 
   .signup-button {
-    background-color: #0073b1;
+    background-color: #ff5733;
     color: white;
     padding: 10px;
     border: none;
@@ -37,7 +37,7 @@ body{
   }
 
   .signup-button:hover {
-    background-color: #005a8e;
+    background-color: #f38269
   }
 
   .error {

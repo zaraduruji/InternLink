@@ -1,66 +1,65 @@
-// backend/users.js
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ApolloProvider, InMemoryCache, ApolloClient } from '@apollo/client';
+import Welcome from './Welcome Page/welcome';
+import Login from './Login Page/Login';
+import Signup from './Signup Page/Signup';
+import { UserContext } from './UserContext';
+import Home from './Home Page/Home';
+import ProfileName from './ProfileSetup/ProfileName';
+import ProfileLocation from './ProfileSetup/ProfileLocation';
+import ProfileJobTitle from './ProfileSetup/ProfileJobTitle';
+import Profile from './Profile Page/Profile';
+import ProfileView from './Profile Page/ProfileView';
+import Friends from './Friends Page/Friends';
+import NotificationCenter from './Notifications/NotificationCenter';
 
-import express from 'express';
-import { PrismaClient } from '@prisma/client';
-import env from 'dotenv';
-import bcrypt from 'bcrypt';
+const client = new ApolloClient({
+    uri: 'http://localhost:4000/graphql', // Update port number if changed
+    cache: new InMemoryCache(),
+  });
 
-const router = express.Router();
-const prisma = new PrismaClient();
-const saltRounds = 10;
-env.config();
 
-router.post('/signup', async (req, res) => {
-    const { name, email, password, confirmPassword, role } = req.body;
-    if (password !== confirmPassword) {
-        return res.status(400).json({ message: 'Passwords do not match' });
-    }
+function App() {
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
     try {
-        const existingUser = await prisma.user.findUnique({
-            where: { email }
-        });
-
-        if (existingUser) {
-            console.log(existingUser)
-            return res.status(400).json({ message: 'User already exists' });
-        }
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                role
-            }
-        });
-        req.session.user = user;
-        res.json({ user });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
     }
+  });
 
-});
+  const updateUser = (newUser) => {
+    setUser(newUser);
+  };
 
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const user = await prisma.user.findUnique({
-            where: { email }
-        });
-        if (!user) {
-            return res.status(401).json({ message: 'Invalid credentials' });
-        } else {
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) {
-                return res.status(401).json({ message: 'Invalid credentials' });
-            }
-            req.session.user = user;
+  useEffect(() => {
+    localStorage.setItem('user', JSON.stringify(user));
+  }, [user]);
 
-            res.json({ user });
-        }
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+  return (
+    <ApolloProvider client={client}>
+      <UserContext.Provider value={{ user, updateUser }}>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Welcome />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/profile-setup" element={<ProfileName />} />
+            <Route path="/profile-location" element={<ProfileLocation />} />
+            <Route path="/profile-job-title" element={<ProfileJobTitle />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:id" element={<ProfileView />} />
+            <Route path="/friends" element={<Friends />} />
+            <Route path="/notifications" element={<NotificationCenter />} />
+          </Routes>
+        </Router>
+      </UserContext.Provider>
+    </ApolloProvider>
+  );
+}
 
-export default router;
+export default App;

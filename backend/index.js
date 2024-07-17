@@ -1,5 +1,3 @@
-// index.js
-
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -12,6 +10,7 @@ import path from 'path';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { v2 as cloudinary } from 'cloudinary';
 
 env.config();
 
@@ -28,14 +27,23 @@ const sessionStore = new SequelizeStore({
 
 const prisma = new PrismaClient();
 
-const upload = multer({ dest: 'uploads/' });
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Update to match your frontend port
+  origin: 'http://localhost:5173',
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(
@@ -54,11 +62,8 @@ app.use(
 
 sessionStore.sync();
 
-// Signup endpoint
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
-
-  console.log('Signup request received:', { email, password });
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -70,19 +75,14 @@ app.post('/signup', async (req, res) => {
         lastName: ''
       },
     });
-    console.log('User created successfully:', user);
     res.status(201).json({ user });
   } catch (error) {
-    console.error('Error during signup:', error);
     res.status(400).json({ error: 'Email already exists' });
   }
 });
 
-// Login endpoint
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
-
-  console.log('Login request received:', { email, password });
 
   try {
     const user = await prisma.user.findUnique({
@@ -90,52 +90,36 @@ app.post('/login', async (req, res) => {
     });
 
     if (!user) {
-      console.log('User not found');
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      console.log('Invalid password');
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     req.session.user = user;
-    console.log('User logged in successfully:', user);
     res.status(200).json({ user });
   } catch (error) {
-    console.error('Error during login:', error);
     res.status(500).json({ error: 'An error occurred during login' });
   }
 });
 
-// Update profile endpoint
 app.put('/update-profile', async (req, res) => {
-  const { userId, firstName, lastName, location, jobTitle } = req.body;
-
-  console.log('Update profile request received:', { userId, firstName, lastName, location, jobTitle });
+  const { userId, firstName, lastName, location, jobTitle, about, education, profilePicture } = req.body;
 
   try {
     const updatedUser = await prisma.user.update({
       where: { id: parseInt(userId, 10) },
-      data: { firstName, lastName, location, jobTitle },
+      data: { firstName, lastName, location, jobTitle, about, education, profilePicture },
     });
-    console.log('User profile updated successfully:', updatedUser);
     res.status(200).json({ user: updatedUser });
   } catch (error) {
-    console.error('Error updating profile:', error);
     res.status(400).json({ error: 'Failed to update profile' });
   }
 });
 
-// Other routes...
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
-});
-
-// Serve job listings from jobListings.json
 app.get('/api/job-listings', (req, res) => {
   const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
   fs.readFile(jsonFilePath, 'utf8', (err, data) => {
@@ -147,64 +131,364 @@ app.get('/api/job-listings', (req, res) => {
   });
 });
 
-// Search endpoint
-app.get('/api/search', (req, res) => {
+app.get('/api/search', async (req, res) => {
   const query = req.query.q ? req.query.q.toLowerCase() : '';
-  const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
-  fs.readFile(jsonFilePath, 'utf8', (err, data) => {
-    if (err) {
-      res.status(500).send('Error reading JSON file');
-      return;
-    }
-    const jobListings = JSON.parse(data);
-    const results = jobListings.filter(job =>
+
+  try {
+    const jobListings = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'jobListings.json'), 'utf8'));
+    const jobResults = jobListings.filter(job =>
       (job.uploaderName && job.uploaderName.toLowerCase().includes(query)) ||
       (job.companyName && job.companyName.toLowerCase().includes(query)) ||
       (job.role && job.role.toLowerCase().includes(query))
     );
-    res.json(results);
-  });
+
+    const userResults = await prisma.user.findMany({
+      where: {
+        OR: [
+          { firstName: { contains: query, mode: 'insensitive' } },
+          { lastName: { contains: query, mode: 'insensitive' } },
+          { email: { contains: query, mode: 'insensitive' } }
+        ]
+      }
+    });
+
+    res.json({ jobResults, userResults });
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred during search' });
+  }
 });
 
-// Endpoint to upload stories
+app.post('/uploadProfilePicture', upload.single('profilePicture'), async (req, res) => {
+  const file = req.file;
+  const userId = req.body.userId;
+
+  if (!file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+      uploadStream.end(file.buffer);
+    });
+
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(userId, 10) },
+      data: { profilePicture: result.secure_url },
+    });
+    res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    res.status(500).send('Error updating profile picture.');
+  }
+});
+
 app.post('/api/uploadStory', upload.single('story'), async (req, res) => {
   const file = req.file;
   const userId = req.body.userId;
 
   if (!file) {
-    console.error('No file uploaded.');
     return res.status(400).send('No file uploaded.');
   }
 
-  const fileUrl = `http://localhost:${port}/uploads/${file.filename}`;
-
   try {
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+      uploadStream.end(file.buffer);
+    });
+
     const story = await prisma.story.create({
       data: {
         userId: parseInt(userId, 10),
-        fileUrl: fileUrl,
+        fileUrl: result.secure_url,
       },
     });
-    console.log('Story uploaded successfully:', story);
     res.status(200).send('Story uploaded successfully!');
   } catch (error) {
-    console.error('Error uploading story:', error);
     res.status(500).send('Error uploading story.');
   }
 });
 
-// Endpoint to fetch stories
 app.get('/api/stories', async (req, res) => {
   try {
     const stories = await prisma.story.findMany();
     res.json(stories);
   } catch (error) {
-    console.error('Error fetching stories:', error);
     res.status(500).send('Error fetching stories.');
   }
 });
 
-// Serve uploaded files
+app.get('/api/users/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// Check if users are already connected before creating a new friend request
+app.post('/api/connect', async (req, res) => {
+  const { userId, targetUserId } = req.body;
+  try {
+    const existingConnection = await prisma.connection.findFirst({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+            status: 'CONNECTED',
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+            status: 'CONNECTED',
+          },
+        ],
+      },
+    });
+
+    if (existingConnection) {
+      return res.status(400).json({ message: 'You are already connected with this user' });
+    }
+
+    const existingFriendRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          {
+            requesterId: parseInt(userId, 10),
+            recipientId: parseInt(targetUserId, 10),
+          },
+          {
+            requesterId: parseInt(targetUserId, 10),
+            recipientId: parseInt(userId, 10),
+          },
+        ],
+      },
+    });
+
+    if (existingFriendRequest) {
+      return res.status(400).json({ message: 'A friend request is already pending with this user' });
+    }
+
+    const friendRequest = await prisma.friendRequest.create({
+      data: {
+        requesterId: parseInt(userId, 10),
+        recipientId: parseInt(targetUserId, 10),
+        status: 'PENDING',
+      },
+    });
+    res.status(200).json({ message: 'Connection request sent', friendRequest });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).send('Failed to log out');
+    }
+    res.clearCookie('connect.sid'); // Adjust the cookie name if different
+    res.status(200).send('Logged out successfully');
+  });
+});
+
+// Friend request endpoints
+app.post('/api/friend-request', async (req, res) => {
+  const { userId, targetUserId } = req.body;
+  try {
+    const existingConnection = await prisma.connection.findFirst({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+            status: 'CONNECTED',
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+            status: 'CONNECTED',
+          },
+        ],
+      },
+    });
+
+    if (existingConnection) {
+      return res.status(400).json({ message: 'You are already connected with this user' });
+    }
+
+    const existingFriendRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          {
+            requesterId: parseInt(userId, 10),
+            recipientId: parseInt(targetUserId, 10),
+          },
+          {
+            requesterId: parseInt(targetUserId, 10),
+            recipientId: parseInt(userId, 10),
+          },
+        ],
+      },
+    });
+
+    if (existingFriendRequest) {
+      return res.status(400).json({ message: 'A friend request is already pending with this user' });
+    }
+
+    const friendRequest = await prisma.friendRequest.create({
+      data: {
+        requesterId: parseInt(userId, 10),
+        recipientId: parseInt(targetUserId, 10),
+        status: 'PENDING',
+      },
+    });
+    res.status(200).json({ message: 'Friend request sent', friendRequest });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.put('/api/friend-request/accept', async (req, res) => {
+  const { requestId } = req.body;
+  try {
+    const friendRequest = await prisma.friendRequest.update({
+      where: { id: parseInt(requestId, 10) },
+      data: { status: 'ACCEPTED' },
+    });
+    await prisma.connection.create({
+      data: {
+        userId: friendRequest.requesterId,
+        friendId: friendRequest.recipientId,
+        status: 'CONNECTED',
+      },
+    });
+    res.status(200).json({ message: 'Friend request accepted', friendRequest });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.put('/api/friend-request/decline', async (req, res) => {
+  const { requestId } = req.body;
+  try {
+    const friendRequest = await prisma.friendRequest.update({
+      where: { id: parseInt(requestId, 10) },
+      data: { status: 'DECLINED' },
+    });
+    res.status(200).json({ message: 'Friend request declined', friendRequest });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// Endpoint to get connections count
+app.get('/api/users/:id/connections-count', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const count = await prisma.connection.count({
+      where: {
+        OR: [
+          { userId: parseInt(id, 10), status: 'CONNECTED' },
+          { friendId: parseInt(id, 10), status: 'CONNECTED' }
+        ]
+      }
+    });
+    res.status(200).json({ count });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+app.get('/api/friend-requests/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const friendRequests = await prisma.friendRequest.findMany({
+      where: {
+        recipientId: parseInt(userId, 10),
+        status: 'PENDING',
+      },
+      include: {
+        requester: true,
+      },
+    });
+    res.status(200).json(friendRequests);
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// Endpoint to check if two users are connected
+app.get('/api/check-connection', async (req, res) => {
+  const { userId, targetUserId } = req.query;
+  try {
+    const connection = await prisma.connection.findFirst({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+            status: 'CONNECTED',
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+            status: 'CONNECTED',
+          },
+        ],
+      },
+    });
+
+    res.status(200).json({ isConnected: !!connection });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
+// Endpoint to remove a connection
+app.post('/api/remove-connection', async (req, res) => {
+  const { userId, targetUserId } = req.body;
+  try {
+    await prisma.connection.deleteMany({
+      where: {
+        OR: [
+          {
+            userId: parseInt(userId, 10),
+            friendId: parseInt(targetUserId, 10),
+          },
+          {
+            userId: parseInt(targetUserId, 10),
+            friendId: parseInt(userId, 10),
+          },
+        ],
+      },
+    });
+    res.status(200).json({ message: 'Connection removed' });
+  } catch (error) {
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+});
+
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.listen(port, () => {

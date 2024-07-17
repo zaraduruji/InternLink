@@ -133,7 +133,6 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
 }
 
 .modal-button, .modal-close {
@@ -291,9 +290,7 @@ textarea {
   padding: 10px;
   margin: 10px 0;
   border-radius: 5px;
-  border: 1px solid #333;
-  background-color: #222;
-  color: #fff;
+  color: black;
 }
 
 .suggestions-list img {
@@ -306,4 +303,15 @@ textarea {
 textarea {
   resize: none;
   height: 150px;
+}
+
+/* Add this to your Profile.css */
+.connection-counter {
+  background-color: #ff6600;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: default;
+  margin-top: 10px;
 }

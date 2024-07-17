@@ -1,11 +1,10 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import './Profile.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faSearch, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
-import defaultProfilePic from '../../public/defaultProfilePic.png';
 import { UserContext } from '../UserContext';
 import Modal from 'react-modal';
+import Sidebar from '../Sidebar/Sidebar';
+import SearchModal from '../SearchModal/SearchModal';
+import defaultProfilePic from '../../public/defaultProfilePic.png';
 
 const Profile = () => {
   const { user, updateUser } = useContext(UserContext);
@@ -28,9 +27,18 @@ const Profile = () => {
   const [universitySuggestions, setUniversitySuggestions] = useState([]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
+  const [connectionsCount, setConnectionsCount] = useState(0);
 
   useEffect(() => {
     console.log('User data:', user);
+
+    // Fetch connections count
+    fetch(`http://localhost:3000/api/users/${user.id}/connections-count`)
+      .then((response) => response.json())
+      .then((data) => setConnectionsCount(data.count))
+      .catch((error) => console.error('Error fetching connections count:', error));
   }, [user]);
 
   const handleTabClick = (tab) => {
@@ -71,20 +79,25 @@ const Profile = () => {
     const context = canvasRef.current.getContext('2d');
     context.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
     const dataUrl = canvasRef.current.toDataURL('image/png');
-    updateUser({ ...user, profilePicture: dataUrl });
-    closeCameraModal();
-    closePhotoModal();
+    handlePhotoUpload(dataUrl);
   };
 
-  const handlePhotoUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateUser({ ...user, profilePicture: reader.result });
-        closePhotoModal();
-      };
-      reader.readAsDataURL(file);
+  const handlePhotoUpload = async (imageData) => {
+    const formData = new FormData();
+    formData.append('profilePicture', imageData);
+    formData.append('userId', user.id);
+
+    try {
+      const response = await fetch('http://localhost:3000/uploadProfilePicture', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      updateUser(data.user);
+      closePhotoModal();
+      closeCameraModal();
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -118,7 +131,7 @@ const Profile = () => {
 
   const fetchUniversitySuggestions = async (query) => {
     if (!query) return;
-    const response = await fetch(`https://kgsearch.googleapis.com/v1/entities:search?query=${query}&key=AIzaSyBcZzt_bq9vIB_S_c0l-rMa-IwpEr-EqNg&limit=10&types=Organization`);
+    const response = await fetch(`https://kgsearch.googleapis.com/v1/entities:search?query=${query}&key=YOUR_API_KEY&limit=10&types=Organization`);
     const data = await response.json();
     const suggestions = data.itemListElement.map((item) => ({
       name: item.result.name,
@@ -141,8 +154,22 @@ const Profile = () => {
   };
 
   const saveAbout = () => {
-    updateUser({ ...user, about });
-    closeAboutModal();
+    fetch('http://localhost:3000/update-profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        about,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        updateUser(data.user);
+        closeAboutModal();
+      })
+      .catch((error) => console.error('Error:', error));
   };
 
   const saveEducationDetails = () => {
@@ -154,48 +181,48 @@ const Profile = () => {
       grade: educationDetails.grade,
       logo: educationDetails.logo
     };
-    updateUser({ ...user, education: [...(user.education || []), updatedEducation] });
-    closeEducationModal();
+    fetch('http://localhost:3000/update-profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        education: [...(user.education || []), updatedEducation],
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        updateUser(data.user);
+        closeEducationModal();
+      })
+      .catch((error) => console.error('Error:', error));
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.body.classList.toggle('light-mode');
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (response.ok) {
+        window.location.href = '/';
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
   };
 
   return (
     <div className="profile-page">
-      <aside className="sidebar">
-        <div className="logo-container">
-          <img src="/logo.png" alt="InternLink Logo" className="logo" />
-          <span className="logo-text">InternLink</span>
-        </div>
-        <nav className="nav-menu">
-          <Link to="/home" className="nav-item">
-            <FontAwesomeIcon icon={faHome} className="nav-icon" />
-            <span className="nav-text">Home</span>
-          </Link>
-          <Link to="/search" className="nav-item">
-            <FontAwesomeIcon icon={faSearch} className="nav-icon" />
-            <span className="nav-text">Search</span>
-          </Link>
-          <Link to="/friends" className="nav-item">
-            <FontAwesomeIcon icon={faUserFriends} className="nav-icon" />
-            <span className="nav-text">Friends</span>
-          </Link>
-          <Link to="/notifications" className="nav-item">
-            <FontAwesomeIcon icon={faBell} className="nav-icon" />
-            <span className="nav-text">Notifications</span>
-          </Link>
-          <Link to="/create-post" className="nav-item">
-            <FontAwesomeIcon icon={faPlusSquare} className="nav-icon" />
-            <span className="nav-text">Create Post</span>
-          </Link>
-          <Link to="/profile" className="nav-item active">
-            <FontAwesomeIcon icon={faUser} className="nav-icon" />
-            <span className="nav-text">Profile</span>
-          </Link>
-          <Link to="/more" className="nav-item">
-            <FontAwesomeIcon icon={faEllipsisH} className="nav-icon" />
-            <span className="nav-text">More</span>
-          </Link>
-        </nav>
-      </aside>
+      <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
 
       <div className="profile-content">
         <div className="profile-header">
@@ -203,12 +230,14 @@ const Profile = () => {
             <img src={user?.profilePicture || defaultProfilePic} alt="Default Profile" />
           </div>
           <div className="profile-info">
-            <h2>{user?.name || 'Your Name'}</h2>
+            <h2>{user?.firstName || 'Your Name'} {user?.lastName}</h2>
             <p>{user?.jobTitle || 'Software Engineer'}</p>
             <p>{user?.location || 'Seattle, WA, USA'}</p>
+            <p>{connectionsCount} Connections</p> {/* Display connections count */}
             <div className="profile-buttons">
               <button className="profile-button">Contact info</button>
               <button className="profile-button" onClick={openModal}>Add profile section</button>
+              <button className="profile-button" onClick={handleLogout}>Logout</button>
             </div>
           </div>
         </div>
@@ -295,7 +324,7 @@ const Profile = () => {
           <button className="modal-button" onClick={openCameraModal}>Use camera</button>
           <label className="modal-button upload-photo-button" htmlFor="file-upload">
             Upload photo
-            <input id="file-upload" type="file" accept="image/*" onChange={handlePhotoUpload} />
+            <input id="file-upload" type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files[0])} />
           </label>
         </div>
         <button className="modal-close" onClick={closePhotoModal}>Close</button>
@@ -388,6 +417,8 @@ const Profile = () => {
         <button className="modal-button" onClick={saveAbout}>Save</button>
         <button className="modal-close" onClick={closeAboutModal}>Close</button>
       </Modal>
+
+      <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} darkMode={darkMode} />
     </div>
   );
 };

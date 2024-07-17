@@ -1,22 +1,25 @@
-.signup-form {
+/* src/Signup Page/Signup.css */
+
+.signup-modal {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.signup-form h2 {
+.signup-title {
   margin-bottom: 20px;
+  text-align: center;
+  color: black;
 }
 
-.signup-form form {
+.signup-form {
   display: flex;
   flex-direction: column;
   width: 100%;
   max-width: 400px;
 }
 
-.signup-form input,
-.signup-form select {
+.signup-input {
   margin-bottom: 15px;
   padding: 10px;
   font-size: 1em;
@@ -25,7 +28,7 @@
   color: #333; /* Ensure the font color is consistent */
 }
 
-.signup-form .signup-button {
+.signup-button {
   padding: 10px 20px;
   font-size: 1em;
   color: white;
@@ -35,20 +38,26 @@
   cursor: pointer;
 }
 
-.signup-form .signup-button:hover {
+.signup-button:hover {
   background-color: #e14e2d;
 }
 
-.signup-form p {
+.signup-message {
   text-align: center;
   margin-top: 10px;
+  color: black;
 }
 
-.signup-form a {
+.signup-message a {
   color: #ff5733;
   text-decoration: none;
 }
 
-.signup-form a:hover {
+.signup-message a:hover {
   text-decoration: underline;
+}
+
+.signup-error {
+  color: red;
+  text-align: center;
 }

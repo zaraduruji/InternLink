@@ -19,98 +19,6 @@ body {
   height: 100vh;
 }
 
-.sidebar {
-  width: 250px;
-  background-color: #000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100vh;
-  border-right: 1px solid #333;
-  transition: width 0.3s;
-}
-
-.logo-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.logo {
-  width: 50px;
-  margin-right: 10px;
-}
-
-.logo-text {
-  color: #ff5733;
-  font-size: 1.5em;
-  font-weight: bold;
-}
-
-.nav-menu {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: 15px 20px;
-  cursor: pointer;
-}
-
-.nav-icon {
-  color: #fff;
-  font-size: 1.5em;
-  margin-right: 10px;
-  transition: color 0.3s;
-}
-
-.nav-text {
-  font-size: 1.2em;
-  transition: color 0.3s;
-  color: #fff;
-}
-
-.nav-item:hover .nav-icon,
-.nav-item:hover .nav-text {
-  color: #ff5733;
-}
-
-.more-menu {
-  width: 100%;
-  padding: 10px 20px;
-}
-
-.more-item {
-  display: flex;
-  align-items: center;
-  padding: 10px 0;
-  cursor: pointer;
-}
-
-.more-icon {
-  color: #fff;
-  font-size: 1.2em;
-  margin-right: 10px;
-}
-
-.more-text {
-  font-size: 1em;
-  color: #fff;
-}
-
-.more-item:hover .more-icon,
-.more-item:hover .more-text {
-  color: #ff5733;
-}
-
 .main-content {
   flex: 1;
   margin-left: 250px;
@@ -246,35 +154,16 @@ body {
   background-color: transparent;
 }
 
-.light-mode .sidebar,
 .light-mode .main-content,
 .light-mode .suggested-connections {
   background-color: #fff;
-}
-
-.light-mode .nav-icon,
-.light-mode .nav-text,
-.light-mode .more-icon,
-.light-mode .more-text {
-  color: #000;
 }
 
 .light-mode .post {
   background-color: #f0f0f0;
 }
 
-.nav-item:hover .nav-icon,
-.nav-item:hover .nav-text,
-.more-item:hover .more-icon,
-.more-item:hover .more-text {
-  color: #ff5733;
-}
-
-.light-mode .sidebar {
-  border-right: 1px solid #dbdbdb;
-}
-
-.search-modal {
+/* .search-modal {
   position: fixed;
   top: 0;
   left: 80px;
@@ -285,11 +174,11 @@ body {
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-}
+} */
 
-.search-modal.open {
+/* .search-modal.open {
   transform: translateX(0);
-}
+} */
 
 .search-header {
   font-size: 1.5em;

@@ -33,7 +33,7 @@ const Welcome = () => {
       </video>
       <div className="overlay">
         <h1 className={`welcome-text ${fadeInWelcomeText ? 'fade-in' : ''}`}>Welcome to InternLink!</h1>
-        <h2 className={`catch-phrase ${fadeInCatchPhrase ? 'fade-in' : ''}`}>Your gateway to the best internships</h2>
+        <h2 className={`unique-catch-phrase ${fadeInCatchPhrase ? 'fade-in' : ''}`}>Your gateway to the best internships</h2>
         <div className={`buttons ${fadeInButtons ? 'fade-in' : ''}`}>
           <button className="login-button" onClick={() => setShowLoginModal(true)}>Log In</button>
           <button className="signup-button" onClick={() => setShowSignupModal(true)}>Sign Up</button>

@@ -1,29 +1,17 @@
-// src/Home Page/Home.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faHome, faUserFriends, faBell, faPlusSquare, faUser, faEllipsisH, faAdjust, faBookmark, faThumbsUp, faComment, faTimes } from '@fortawesome/free-solid-svg-icons';
-import logo from '/logo.png';
+import { faThumbsUp, faComment } from '@fortawesome/free-solid-svg-icons';
 import StoryUpload from '../StoryUpload/StoryUpload';
 import Stories from '../StoryDisplays/Stories';
 import { UserContext } from '../UserContext';
+import Sidebar from '../Sidebar/Sidebar';
 
 const Home = () => {
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [jobListings, setJobListings] = useState([]);
-  const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [showProfilePreview, setShowProfilePreview] = useState(false); // State for profile preview
   const { user } = useContext(UserContext);
-
-  const toggleMore = () => {
-    setIsMoreOpen(!isMoreOpen);
-  };
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -37,92 +25,9 @@ const Home = () => {
       .catch(error => console.error('Error fetching job listings:', error));
   }, []);
 
-  useEffect(() => {
-    if (searchTerm) {
-      const results = jobListings.filter(job =>
-        (selectedFilter === 'all' || selectedFilter === 'people') && job.uploaderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (selectedFilter === 'all' || selectedFilter === 'jobs') && job.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (selectedFilter === 'all' || selectedFilter === 'companies') && job.companyName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
-  }, [searchTerm, jobListings, selectedFilter]);
-
-  const handleFilterChange = (filter) => {
-    setSelectedFilter(filter);
-  };
-
   return (
-    <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'} ${searchModalOpen ? 'search-open' : ''}`}>
-      <aside className="sidebar">
-        <div className="logo-container">
-          <img src={logo} alt="InternLink Logo" className="logo" />
-          <span className="logo-text">InternLink</span>
-        </div>
-        <nav className="nav-menu">
-          <div className="nav-item">
-            <FontAwesomeIcon icon={faHome} className="nav-icon" />
-            <span className="nav-text">Home</span>
-          </div>
-          <div className="nav-item" onClick={() => setSearchModalOpen(true)}>
-            <FontAwesomeIcon icon={faSearch} className="nav-icon" />
-            <span className="nav-text">Search</span>
-          </div>
-          <div className="nav-item">
-            <FontAwesomeIcon icon={faUserFriends} className="nav-icon" />
-            <span className="nav-text">Friends</span>
-          </div>
-          <div className="nav-item">
-            <FontAwesomeIcon icon={faBell} className="nav-icon" />
-            <span className="nav-text">Notifications</span>
-          </div>
-          <div className="nav-item">
-            <FontAwesomeIcon icon={faPlusSquare} className="nav-icon" />
-            <span className="nav-text">Create Post</span>
-          </div>
-          <Link
-            to="/profile"
-            className="nav-item"
-            onMouseEnter={() => setShowProfilePreview(true)}
-            onMouseLeave={() => setShowProfilePreview(false)}
-          >
-            <FontAwesomeIcon icon={faUser} className="nav-icon" />
-            <span className="nav-text">Profile</span>
-            {showProfilePreview && (
-              <div className="profile-preview">
-                <div className="profile-picture">
-                  <img src="/default-profile-pic.png" alt="Profile" />
-                </div>
-                <div className="profile-details">
-                  <div className="profile-name">{user.firstName} {user.lastName}</div>
-                  <div className="profile-view-button">
-                    <button onClick={() => window.location.href = '/profile'}>View Profile</button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Link>
-          <div className="nav-item more" onClick={toggleMore}>
-            <FontAwesomeIcon icon={faEllipsisH} className="nav-icon" />
-            <span className="nav-text">More</span>
-          </div>
-          {isMoreOpen && (
-            <div className="more-menu">
-              <div className="more-item" onClick={toggleDarkMode}>
-                <FontAwesomeIcon icon={faAdjust} className="more-icon" />
-                <span className="more-text">Switch Appearance</span>
-              </div>
-              <div className="more-item">
-                <FontAwesomeIcon icon={faBookmark} className="more-icon" />
-                <span className="more-text">Saved</span>
-              </div>
-            </div>
-          )}
-        </nav>
-      </aside>
-
+    <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
+      <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
       <main className="main-content">
         <div className="stories-lineup">
           <Stories /> {/* Displaying stories */}
@@ -169,43 +74,6 @@ const Home = () => {
         <div className="connection">Connection 3</div>
         <div className="connection">Connection 4</div>
       </aside>
-
-      {searchModalOpen && (
-        <div className={`search-modal ${searchModalOpen ? 'open' : ''}`}>
-          <div className="search-bar">
-            <FontAwesomeIcon icon={faSearch} className="search-icon" />
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button className="close-button" onClick={() => setSearchModalOpen(false)}>
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-          </div>
-          <div className="filter-buttons">
-            <button onClick={() => handleFilterChange('all')} className={selectedFilter === 'all' ? 'active' : ''}>All</button>
-            <button onClick={() => handleFilterChange('people')} className={selectedFilter === 'people' ? 'active' : ''}>People</button>
-            <button onClick={() => handleFilterChange('posts')} className={selectedFilter === 'posts' ? 'active' : ''}>Posts</button>
-            <button onClick={() => handleFilterChange('jobs')} className={selectedFilter === 'jobs' ? 'active' : ''}>Jobs</button>
-            <button onClick={() => handleFilterChange('companies')} className={selectedFilter === 'companies' ? 'active' : ''}>Companies</button>
-          </div>
-          <div className="search-results">
-            {searchResults.map((result, index) => (
-              <div key={index} className="search-result">
-                <img src={result.userProfilePicture} alt={result.uploaderName} className="search-result-profile-pic" />
-                <div className="search-result-info">
-                  <span className="search-result-name">{result.uploaderName}</span>
-                  <span className="search-result-role">{result.role}</span>
-                  <span className="search-result-company">{result.companyName}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
