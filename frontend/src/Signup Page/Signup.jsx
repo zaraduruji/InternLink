@@ -78,6 +78,7 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
         {error && <div className="signup-error">{error}</div>}
         <button type="submit" className='signup-button'>Agree & Join</button>
         <p className='signup-message'>Already on InternLink? <a href="#" onClick={handleLoginClick}>Log In</a></p>
+        <p>hello</p>
       </form>
     </div>
   );
