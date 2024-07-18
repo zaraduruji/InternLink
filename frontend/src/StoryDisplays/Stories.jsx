@@ -103,8 +103,21 @@ const Stories = ({ currentUser }) => {
     input.click();
   };
 
-  const handleStoryClick = (userStories) => {
-    setViewingStories(userStories.stories);
+  const handleStoryClick = (userStory) => {
+    const formattedStories = Object.values(groupStoriesByUser(stories)).map(userStories => ({
+      firstName: userStories.user.firstName,
+      lastName: userStories.user.lastName,
+      profilePicture: userStories.user.profilePicture,
+      stories: userStories.stories
+    }));
+
+    const clickedUserIndex = formattedStories.findIndex(story => story.firstName === userStory.user.firstName);
+
+    if (clickedUserIndex !== -1) {
+      formattedStories.unshift(...formattedStories.splice(clickedUserIndex, 1));
+    }
+
+    setViewingStories(formattedStories);
   };
 
   const groupedStories = groupStoriesByUser(stories);

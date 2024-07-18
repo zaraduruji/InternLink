@@ -3,6 +3,7 @@ import './StoryViewer.css';
 import defaultProfilePic from '../../public/defaultProfilePic.png';
 
 const StoryViewer = ({ stories, onClose }) => {
+  const [currentUserIndex, setCurrentUserIndex] = useState(0);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -11,20 +12,19 @@ const StoryViewer = ({ stories, onClose }) => {
       if (progress < 100) {
         setProgress(prev => prev + 1);
       } else {
-        if (currentStoryIndex < stories.length - 1) {
-          setCurrentStoryIndex(prev => prev + 1);
-          setProgress(0);
-        } else {
-          onClose();
-        }
+        handleNext();
       }
     }, 30);
     return () => clearInterval(timer);
-  }, [progress, currentStoryIndex, stories.length, onClose]);
+  }, [progress]);
 
   const handleNext = () => {
-    if (currentStoryIndex < stories.length - 1) {
+    if (currentStoryIndex < stories[currentUserIndex].stories.length - 1) {
       setCurrentStoryIndex(prev => prev + 1);
+      setProgress(0);
+    } else if (currentUserIndex < stories.length - 1) {
+      setCurrentUserIndex(prev => prev + 1);
+      setCurrentStoryIndex(0);
       setProgress(0);
     } else {
       onClose();
@@ -35,23 +35,47 @@ const StoryViewer = ({ stories, onClose }) => {
     if (currentStoryIndex > 0) {
       setCurrentStoryIndex(prev => prev - 1);
       setProgress(0);
+    } else if (currentUserIndex > 0) {
+      setCurrentUserIndex(prev => prev - 1);
+      setCurrentStoryIndex(stories[currentUserIndex - 1].stories.length - 1);
+      setProgress(0);
     }
   };
 
-  const currentStory = stories[currentStoryIndex];
-  console.log('Current story:', currentStory);
+  const handleNextUser = () => {
+    if (currentUserIndex < stories.length - 1) {
+      setCurrentUserIndex(prev => prev + 1);
+      setCurrentStoryIndex(0);
+      setProgress(0);
+    }
+  };
+
+  const handlePreviousUser = () => {
+    if (currentUserIndex > 0) {
+      setCurrentUserIndex(prev => prev - 1);
+      setCurrentStoryIndex(0);
+      setProgress(0);
+    }
+  };
+
+  const currentUser = stories[currentUserIndex];
+  const currentStory = currentUser.stories[currentStoryIndex];
 
   return (
     <div className="story-viewer">
       <div className="story-container">
         <div className="story-header">
           <div className="progress-container">
-            {stories.map((_, index) => (
+            {currentUser.stories.map((_, index) => (
               <div key={index} className="progress-bar">
                 <div
                   className="progress-fill"
                   style={{
-                    width: index === currentStoryIndex ? `${progress}%` : index < currentStoryIndex ? '100%' : '0%'
+                    width: index === currentStoryIndex
+                      ? `${progress}%`
+                      : index < currentStoryIndex
+                      ? '100%'
+                      : '0%'
                   }}
                 ></div>
               </div>
@@ -59,14 +83,14 @@ const StoryViewer = ({ stories, onClose }) => {
           </div>
           <div className="user-info">
             <img
-              src={currentStory.user?.profilePicture || currentStory.profilePicture || defaultProfilePic}
+              src={currentUser.profilePicture || defaultProfilePic}
               alt="User avatar"
               className="user-avatar"
             />
             <span className="username">
-              {currentStory.user?.firstName
-                ? `${currentStory.user.firstName} ${currentStory.user.lastName}`
-                : currentStory.username || 'Unknown User'}
+              {currentUser.firstName
+                ? `${currentUser.firstName} ${currentUser.lastName}`
+                : currentUser.username || 'Unknown User'}
             </span>
           </div>
         </div>
@@ -74,6 +98,10 @@ const StoryViewer = ({ stories, onClose }) => {
         <div className="story-controls">
           <div className="story-control left" onClick={handlePrevious}></div>
           <div className="story-control right" onClick={handleNext}></div>
+        </div>
+        <div className="user-navigation">
+          <button className="nav-button left" onClick={handlePreviousUser}>&lt;</button>
+          <button className="nav-button right" onClick={handleNextUser}>&gt;</button>
         </div>
       </div>
       <button className="close-button" onClick={onClose}>×</button>

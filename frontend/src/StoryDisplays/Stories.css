@@ -52,3 +52,37 @@
     font-size: 16px;
     font-weight: bold;
   }
+
+  .user-navigation {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+
+  .nav-button {
+    background-color: rgba(255, 255, 255, 0.3);
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .nav-button:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .nav-button.left {
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+  }
+
+  .nav-button.right {
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+  }

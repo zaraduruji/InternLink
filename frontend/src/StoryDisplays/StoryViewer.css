@@ -29,12 +29,12 @@
 
   .progress-container {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    width: 100%;
+    padding: 10px;
   }
 
   .progress-bar {
-    flex-grow: 1;
+    flex: 1;
     height: 2px;
     background-color: rgba(255, 255, 255, 0.3);
     margin: 0 2px;
