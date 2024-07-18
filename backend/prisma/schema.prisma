@@ -121,5 +121,6 @@ model Story {
   userId    Int
   fileUrl   String
   createdAt DateTime @default(now())
+  expiresAt DateTime
   user      User     @relation("userStory", fields: [userId], references: [id])
 }
