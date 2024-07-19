@@ -508,6 +508,37 @@ app.get('/api/stories', async (req, res) => {
   }
 });
 
+app.delete('/api/stories/:storyId', async (req, res) => {
+  const { storyId } = req.params;
+
+  try {
+    const deletedStory = await prisma.story.delete({
+      where: { id: parseInt(storyId, 10) },
+    });
+
+    res.status(200).json({ message: 'Story deleted successfully', deletedStory });
+  } catch (error) {
+    console.error('Error deleting story:', error);
+    res.status(500).json({ error: 'Failed to delete story' });
+  }
+});
+
+app.delete('/api/stories/expired', async (req, res) => {
+  try {
+    const expiredStories = await prisma.story.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date(), // Delete stories where expiresAt is less than current time
+        },
+      },
+    });
+
+    res.json({ deletedCount: expiredStories.count });
+  } catch (error) {
+    res.status(500).send('Error deleting expired stories.');
+  }
+});
+
 app.get('/api/users/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -550,25 +581,6 @@ app.post('/logout', (req, res) => {
     res.status(200).send('Logged out successfully');
   });
 });
-
-//Endpoint to delete stories
-
-app.delete('/api/stories/expired', async (req, res) => {
-  try {
-    const expiredStories = await prisma.story.deleteMany({
-      where: {
-        expiresAt: {
-          lt: new Date(), // Delete stories where expiresAt is less than current time
-        },
-      },
-    });
-
-    res.json({ deletedCount: expiredStories.count });
-  } catch (error) {
-    res.status(500).send('Error deleting expired stories.');
-  }
-});
-
 
 async function startServer() {
   await server.start();

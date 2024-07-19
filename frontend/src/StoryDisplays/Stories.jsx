@@ -44,7 +44,6 @@ const Stories = ({ currentUser }) => {
         body: formData,
       });
       if (response.ok) {
-        const newStory = await response.json();
         await fetchStories(); // Fetch the updated list of stories
       } else {
         console.error('Failed to upload story');
@@ -105,19 +104,42 @@ const Stories = ({ currentUser }) => {
 
   const handleStoryClick = (userStory) => {
     const formattedStories = Object.values(groupStoriesByUser(stories)).map(userStories => ({
-      firstName: userStories.user.firstName,
-      lastName: userStories.user.lastName,
-      profilePicture: userStories.user.profilePicture,
+      ...userStories.user,
       stories: userStories.stories
     }));
 
-    const clickedUserIndex = formattedStories.findIndex(story => story.firstName === userStory.user.firstName);
+    const clickedUserIndex = formattedStories.findIndex(story => story.id === userStory.user.id);
 
     if (clickedUserIndex !== -1) {
       formattedStories.unshift(...formattedStories.splice(clickedUserIndex, 1));
     }
 
     setViewingStories(formattedStories);
+  };
+
+  const handleDeleteStory = async (storyId) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/stories/${storyId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        // Remove the story from the local state
+        setStories(prevStories => prevStories.filter(story => story.id !== storyId));
+        // Update the viewingStories state
+        setViewingStories(prevViewingStories => {
+          const updatedViewingStories = prevViewingStories.map(user => ({
+            ...user,
+            stories: user.stories.filter(story => story.id !== storyId)
+          }));
+          return updatedViewingStories.filter(user => user.stories.length > 0);
+        });
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to delete story:', errorData);
+      }
+    } catch (error) {
+      console.error('Error deleting story:', error);
+    }
   };
 
   const groupedStories = groupStoriesByUser(stories);
@@ -151,6 +173,8 @@ const Stories = ({ currentUser }) => {
         <StoryViewer
           stories={viewingStories}
           onClose={() => setViewingStories(null)}
+          currentUser={currentUser}
+          onDeleteStory={handleDeleteStory}
         />
       )}
     </>

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import './StoryViewer.css';
 import defaultProfilePic from '../../public/defaultProfilePic.png';
 
-const StoryViewer = ({ stories, onClose }) => {
+const StoryViewer = ({ stories, onClose, currentUser, onDeleteStory }) => {
   const [currentUserIndex, setCurrentUserIndex] = useState(0);
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -19,7 +20,7 @@ const StoryViewer = ({ stories, onClose }) => {
   }, [progress]);
 
   const handleNext = () => {
-    if (currentStoryIndex < stories[currentUserIndex].stories.length - 1) {
+    if (currentStoryIndex < stories[currentUserIndex]?.stories?.length - 1) {
       setCurrentStoryIndex(prev => prev + 1);
       setProgress(0);
     } else if (currentUserIndex < stories.length - 1) {
@@ -37,7 +38,7 @@ const StoryViewer = ({ stories, onClose }) => {
       setProgress(0);
     } else if (currentUserIndex > 0) {
       setCurrentUserIndex(prev => prev - 1);
-      setCurrentStoryIndex(stories[currentUserIndex - 1].stories.length - 1);
+      setCurrentStoryIndex(stories[currentUserIndex - 1]?.stories?.length - 1 || 0);
       setProgress(0);
     }
   };
@@ -58,15 +59,46 @@ const StoryViewer = ({ stories, onClose }) => {
     }
   };
 
-  const currentUser = stories[currentUserIndex];
-  const currentStory = currentUser.stories[currentStoryIndex];
+  const handleMenuToggle = () => {
+    setShowMenu(!showMenu);
+  };
+
+  const handleDeleteStory = () => {
+    if (onDeleteStory && currentUser.id === activeUser.id) {
+      onDeleteStory(currentStory.id)
+        .then(() => {
+          setShowMenu(false);
+          if (currentStoryIndex > 0) {
+            setCurrentStoryIndex(currentStoryIndex - 1);
+          } else if (currentUserIndex > 0) {
+            setCurrentUserIndex(currentUserIndex - 1);
+            setCurrentStoryIndex(stories[currentUserIndex - 1]?.stories?.length - 1 || 0);
+          } else {
+            onClose();
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to delete story:', error);
+        });
+    } else {
+      console.log('Delete conditions not met');
+    }
+  };
+
+  if (!stories || stories.length === 0) {
+    return null;
+  }
+
+  const activeUser = stories[currentUserIndex];
+  const currentStory = activeUser?.stories[currentStoryIndex];
+  const isCurrentUserStory = activeUser.id === currentUser.id;
 
   return (
     <div className="story-viewer">
       <div className="story-container">
         <div className="story-header">
           <div className="progress-container">
-            {currentUser.stories.map((_, index) => (
+            {activeUser.stories.map((_, index) => (
               <div key={index} className="progress-bar">
                 <div
                   className="progress-fill"
@@ -83,16 +115,26 @@ const StoryViewer = ({ stories, onClose }) => {
           </div>
           <div className="user-info">
             <img
-              src={currentUser.profilePicture || defaultProfilePic}
+              src={activeUser.profilePicture || defaultProfilePic}
               alt="User avatar"
               className="user-avatar"
             />
             <span className="username">
-              {currentUser.firstName
-                ? `${currentUser.firstName} ${currentUser.lastName}`
-                : currentUser.username || 'Unknown User'}
+              {activeUser.firstName
+                ? `${activeUser.firstName} ${activeUser.lastName}`
+                : activeUser.username || 'Unknown User'}
             </span>
           </div>
+          {isCurrentUserStory && (
+            <div className="story-menu">
+              <button onClick={handleMenuToggle} className="menu-button">...</button>
+              {showMenu && (
+                <div className="menu-dropdown">
+                  <button onClick={handleDeleteStory} className="delete-button">🗑️ Delete</button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <img src={currentStory.fileUrl} alt="Story" className="story-image" />
         <div className="story-controls">
