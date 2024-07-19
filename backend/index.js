@@ -14,6 +14,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { ApolloServer } from 'apollo-server-express';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { addHours } from 'date-fns';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -432,7 +433,7 @@ app.delete('/api/connections/:userId/:friendId', async (req, res) => {
   }
 });
 
-app.post('/api/uploadStory', upload.single('story'), async (req, res) => {
+app.post('/api/stories', upload.single('story'), async (req, res) => {
   const file = req.file;
   const userId = req.body.userId;
 
@@ -456,9 +457,11 @@ app.post('/api/uploadStory', upload.single('story'), async (req, res) => {
       data: {
         userId: parseInt(userId, 10),
         fileUrl: result.secure_url,
+        expiresAt: addHours(new Date(), 24), // Set expiration to 24 hours from now
       },
     });
-    res.status(200).send('Story uploaded successfully!');
+
+    res.status(200).json({ message: 'Story uploaded successfully!', story });
   } catch (error) {
     res.status(500).send('Error uploading story.');
   }
@@ -466,10 +469,73 @@ app.post('/api/uploadStory', upload.single('story'), async (req, res) => {
 
 app.get('/api/stories', async (req, res) => {
   try {
-    const stories = await prisma.story.findMany();
-    res.json(stories);
+    const stories = await prisma.story.findMany({
+      where: {
+        expiresAt: {
+          gte: new Date(), // Only fetch stories that haven't expired
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profilePicture: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Group stories by user
+    const groupedStories = stories.reduce((acc, story) => {
+      if (!acc[story.userId]) {
+        acc[story.userId] = {
+          user: story.user,
+          stories: [],
+        };
+      }
+      acc[story.userId].stories.push(story);
+      return acc;
+    }, {});
+
+    res.json(Object.values(groupedStories));
   } catch (error) {
     res.status(500).send('Error fetching stories.');
+  }
+});
+
+app.delete('/api/stories/:storyId', async (req, res) => {
+  const { storyId } = req.params;
+
+  try {
+    const deletedStory = await prisma.story.delete({
+      where: { id: parseInt(storyId, 10) },
+    });
+
+    res.status(200).json({ message: 'Story deleted successfully', deletedStory });
+  } catch (error) {
+    console.error('Error deleting story:', error);
+    res.status(500).json({ error: 'Failed to delete story' });
+  }
+});
+
+app.delete('/api/stories/expired', async (req, res) => {
+  try {
+    const expiredStories = await prisma.story.deleteMany({
+      where: {
+        expiresAt: {
+          lt: new Date(), // Delete stories where expiresAt is less than current time
+        },
+      },
+    });
+
+    res.json({ deletedCount: expiredStories.count });
+  } catch (error) {
+    res.status(500).send('Error deleting expired stories.');
   }
 });
 
@@ -515,8 +581,6 @@ app.post('/logout', (req, res) => {
     res.status(200).send('Logged out successfully');
   });
 });
-
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 async function startServer() {
   await server.start();
