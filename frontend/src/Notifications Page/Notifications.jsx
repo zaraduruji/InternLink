@@ -1,6 +1,7 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { UserContext } from '../UserContext';
+import StoryViewer from '../StoryDisplays/StoryViewer';
 import './Notifications.css';
 
 const GET_NOTIFICATIONS = gql`
@@ -12,6 +13,7 @@ const GET_NOTIFICATIONS = gql`
       isRead
       createdAt
       friendRequestId
+      storyId
     }
   }
 `;
@@ -46,6 +48,7 @@ const DECLINE_FRIEND_REQUEST = gql`
 function Notifications({ onClose }) {
   const { user, updateUser } = useContext(UserContext);
   const [activeTab, setActiveTab] = useState('unread');
+  const [viewingStories, setViewingStories] = useState(null);
   const { loading, error, data, refetch } = useQuery(GET_NOTIFICATIONS, {
     variables: { userId: user.id },
   });
@@ -98,6 +101,27 @@ function Notifications({ onClose }) {
     }
   };
 
+  const handleViewStory = async (notificationId, storyId) => {
+    try {
+      await handleMarkAsRead(notificationId);
+      const response = await fetch(`http://localhost:3000/api/stories/${storyId}`);
+      if (response.ok) {
+        const story = await response.json();
+        setViewingStories([{
+          id: story.user.id,
+          firstName: story.user.firstName,
+          lastName: story.user.lastName,
+          profilePicture: story.user.profilePicture,
+          stories: [story]
+        }]);
+      } else {
+        console.error('Failed to fetch story');
+      }
+    } catch (error) {
+      console.error('Error viewing story:', error);
+    }
+  };
+
   if (loading) return <p>Loading notifications...</p>;
   if (error) return <p>Error loading notifications: {error.message}</p>;
 
@@ -131,6 +155,7 @@ function Notifications({ onClose }) {
                 onMarkAsRead={handleMarkAsRead}
                 onAccept={handleAcceptFriendRequest}
                 onDecline={handleDeclineFriendRequest}
+                onViewStory={handleViewStory}
               />
             ))}
           </div>
@@ -143,16 +168,25 @@ function Notifications({ onClose }) {
                 key={notification.id}
                 notification={notification}
                 isRead={true}
+                onViewStory={handleViewStory}
               />
             ))}
           </div>
         )}
       </div>
+      {viewingStories && (
+        <StoryViewer
+          stories={viewingStories}
+          onClose={() => setViewingStories(null)}
+          currentUser={user}
+          onDeleteStory={() => {}} // Add a delete handler if needed
+        />
+      )}
     </div>
   );
 }
 
-function NotificationItem({ notification, onMarkAsRead, onAccept, onDecline, isRead }) {
+function NotificationItem({ notification, onMarkAsRead, onAccept, onDecline, onViewStory, isRead }) {
   return (
     <div className={`notification ${isRead ? 'read' : 'unread'}`}>
       <p className="notification-content">{notification.content}</p>
@@ -163,6 +197,11 @@ function NotificationItem({ notification, onMarkAsRead, onAccept, onDecline, isR
             <div className="friend-request-actions">
               <button onClick={() => onAccept(notification.id, notification.friendRequestId)}>Accept</button>
               <button onClick={() => onDecline(notification.id, notification.friendRequestId)}>Decline</button>
+            </div>
+          )}
+          {notification.type === 'STORY_UPLOAD' && (
+            <div className="story-notification-actions">
+              <button onClick={() => onViewStory(notification.id, notification.storyId)}>View Story</button>
             </div>
           )}
         </>

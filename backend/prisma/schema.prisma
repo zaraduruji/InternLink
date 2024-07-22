@@ -73,6 +73,8 @@ model Notification {
   user            User          @relation(fields: [userId], references: [id])
   friendRequestId Int?
   friendRequest   FriendRequest? @relation(fields: [friendRequestId], references: [id])
+  storyId         Int?          // New field
+  story           Story?        @relation(fields: [storyId], references: [id]) // New relation
 }
 
 
@@ -117,10 +119,11 @@ model Comment {
 }
 
 model Story {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  fileUrl   String
-  createdAt DateTime @default(now())
-  expiresAt DateTime
-  user      User     @relation("userStory", fields: [userId], references: [id])
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  fileUrl       String
+  createdAt     DateTime      @default(now())
+  expiresAt     DateTime
+  user          User          @relation("userStory", fields: [userId], references: [id])
+  notifications Notification[] // New relation
 }

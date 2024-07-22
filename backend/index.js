@@ -82,7 +82,7 @@ const resolvers = {
       return prisma.notification.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
-        include: { friendRequest: true },
+        include: { friendRequest: true, story: true },
       });
     },
   },
@@ -167,9 +167,48 @@ const resolvers = {
         data: { isRead: true },
       });
     },
+    createStoryNotification: async (_, { userId, storyId }) => {
+      const story = await prisma.story.findUnique({
+        where: { id: storyId },
+        include: { user: true },
+      });
+
+      if (!story) {
+        throw new Error('Story not found');
+      }
+
+      // Get the user's connections
+      const connections = await prisma.connection.findMany({
+        where: {
+          OR: [
+            { userId: story.userId },
+            { friendId: story.userId }
+          ],
+          status: 'CONNECTED'
+        },
+      });
+
+      // Create notifications for all connections
+      const notifications = await Promise.all(
+        connections.map(async (connection) => {
+          const recipientId = connection.userId === story.userId ? connection.friendId : connection.userId;
+          return prisma.notification.create({
+            data: {
+              userId: recipientId,
+              type: 'STORY_UPLOAD',
+              content: `${story.user.firstName} ${story.user.lastName} uploaded a new story`,
+              isRead: false,
+              storyId: story.id,
+            },
+          });
+        })
+      );
+
+      // Return the first notification (you might want to adjust this based on your needs)
+      return notifications[0];
+    },
   },
 };
-
 // Create Apollo Server
 const server = new ApolloServer({ typeDefs, resolvers });
 
@@ -461,8 +500,38 @@ app.post('/api/stories', upload.single('story'), async (req, res) => {
       },
     });
 
+    // Create notifications for connections
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId, 10) },
+      select: { firstName: true, lastName: true },
+    });
+
+    const connections = await prisma.connection.findMany({
+      where: {
+        OR: [
+          { userId: parseInt(userId, 10) },
+          { friendId: parseInt(userId, 10) },
+        ],
+        status: 'CONNECTED',
+      },
+    });
+
+    for (const connection of connections) {
+      const recipientId = connection.userId === parseInt(userId, 10) ? connection.friendId : connection.userId;
+      await prisma.notification.create({
+        data: {
+          userId: recipientId,
+          type: 'STORY_UPLOAD',
+          content: `${user.firstName} ${user.lastName} uploaded a new story`,
+          isRead: false,
+          storyId: story.id,
+        },
+      });
+    }
+
     res.status(200).json({ message: 'Story uploaded successfully!', story });
   } catch (error) {
+    console.error('Error uploading story:', error);
     res.status(500).send('Error uploading story.');
   }
 });

@@ -52,7 +52,6 @@ function App() {
             <Route path="/profile-location" element={<ProfileLocation />} />
             <Route path="/profile-job-title" element={<ProfileJobTitle />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/:id" element={<ProfileView />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/notifications" element={<Notifications />} />
           </Routes>
