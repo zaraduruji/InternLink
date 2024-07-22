@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { usePosts } from '../PostContext';
 import './CreatePost.css';
 
 function CreatePost({ isOpen, onClose }) {
   const [postContent, setPostContent] = useState('');
   const [image, setImage] = useState(null);
+  const { addPost } = usePosts();
 
   const handleContentChange = (e) => setPostContent(e.target.value);
 
@@ -15,8 +17,17 @@ function CreatePost({ isOpen, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Post content:', postContent);
-    console.log('Image:', image);
+    const newPost = {
+      id: Date.now(),
+      content: postContent,
+      image: image,
+      timestamp: new Date().toISOString(),
+      likeCount: 0,
+      comments: []
+    };
+    addPost(newPost);
+    setPostContent('');
+    setImage(null);
     onClose();
   };
 

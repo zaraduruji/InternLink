@@ -5,6 +5,7 @@ import Welcome from './Welcome Page/welcome';
 import Login from './Login Page/Login';
 import Signup from './Signup Page/Signup';
 import { UserContext } from './UserContext';
+import { PostProvider } from './PostContext'; // Import the PostProvider
 import Home from './Home Page/Home';
 import ProfileName from './ProfileSetup/ProfileName';
 import ProfileLocation from './ProfileSetup/ProfileLocation';
@@ -47,22 +48,24 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <UserContext.Provider value={{ user, updateUser }}>
-        <Router>
-          <CreatePost isOpen={isCreatePostModalOpen} onClose={closeCreatePostModal} />
-          <Routes>
-            <Route path="/" element={<Welcome />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/home" element={<Home openCreatePostModal={openCreatePostModal} />} />
-            <Route path="/profile-setup" element={<ProfileName />} />
-            <Route path="/profile-location" element={<ProfileLocation />} />
-            <Route path="/profile-job-title" element={<ProfileJobTitle />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/:id" element={<ProfileView />} />
-            <Route path="/friends" element={<Friends />} />
-            <Route path="/notifications" element={<Notifications />} />
-          </Routes>
-        </Router>
+        <PostProvider> {/* Wrap the Router with PostProvider */}
+          <Router>
+            <CreatePost isOpen={isCreatePostModalOpen} onClose={closeCreatePostModal} />
+            <Routes>
+              <Route path="/" element={<Welcome />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/home" element={<Home openCreatePostModal={openCreatePostModal} />} />
+              <Route path="/profile-setup" element={<ProfileName />} />
+              <Route path="/profile-location" element={<ProfileLocation />} />
+              <Route path="/profile-job-title" element={<ProfileJobTitle />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:id" element={<ProfileView />} />
+              <Route path="/friends" element={<Friends />} />
+              <Route path="/notifications" element={<Notifications />} />
+            </Routes>
+          </Router>
+        </PostProvider>
       </UserContext.Provider>
     </ApolloProvider>
   );

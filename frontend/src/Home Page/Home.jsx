@@ -5,37 +5,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faThumbsUp, faComment } from '@fortawesome/free-solid-svg-icons';
 import Stories from '../StoryDisplays/Stories';
 import { UserContext } from '../UserContext';
+import { usePosts } from '../PostContext';
 import Sidebar from '../Sidebar/Sidebar';
 import Notifications from '../Notifications Page/Notifications';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Home = ({ openCreatePostModal }) => {
   const [darkMode, setDarkMode] = useState(true);
-  const [jobListings, setJobListings] = useState([]);
   const { user } = useContext(UserContext);
+  const { posts } = usePosts();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.body.classList.toggle('light-mode');
   };
-
-  useEffect(() => {
-    const fetchJobListings = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/api/job-listings');
-        const data = await response.json();
-        setJobListings(data);
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error fetching job listings:', error);
-        setIsLoading(false);
-      }
-    };
-
-    fetchJobListings();
-  }, []);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -63,26 +48,25 @@ const Home = ({ openCreatePostModal }) => {
           <Stories currentUser={user} />
         </div>
         <div className="posts-container">
-          {jobListings.map((job, index) => (
-            <div key={index} className="post">
+          {posts.map((post, index) => (
+            <div key={post.id} className="post">
               <div className="post-header">
-                <img src={job.userProfilePicture} alt={job.uploaderName} className="post-profile-pic" />
+                <img src={user.profilePicture} alt={user.name} className="post-profile-pic" />
                 <div className="post-info">
-                  <span className="post-user-name">{job.uploaderName}</span>
-                  <span className="post-company-name">{job.companyName}</span>
-                  <span className="post-timestamp">{new Date(job.timestamp).toLocaleString()}</span>
+                  <span className="post-user-name">{user.name}</span>
+                  <span className="post-timestamp">{new Date(post.timestamp).toLocaleString()}</span>
                 </div>
               </div>
-              <div className="post-description">{job.description}</div>
-              {job.imageUrl && <img src={job.imageUrl} alt="Job" className="post-image" />}
+              <div className="post-description">{post.content}</div>
+              {post.image && <img src={URL.createObjectURL(post.image)} alt="Post" className="post-image" />}
               <div className="post-footer">
                 <div className="post-actions">
                   <FontAwesomeIcon icon={faThumbsUp} className="post-action-icon" />
-                  <span>{job.likeCount}</span>
+                  <span>{post.likeCount}</span>
                   <FontAwesomeIcon icon={faComment} className="post-action-icon" />
                 </div>
                 <div className="post-comments">
-                  {job.comments.map((comment, index) => (
+                  {post.comments.map((comment, index) => (
                     <div key={index} className="comment">
                       <span className="comment-content">{comment.content}</span>
                       <span className="comment-timestamp">{new Date(comment.timestamp).toLocaleString()}</span>
