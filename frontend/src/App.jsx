@@ -10,7 +10,7 @@ import ProfileName from './ProfileSetup/ProfileName';
 import ProfileLocation from './ProfileSetup/ProfileLocation';
 import ProfileJobTitle from './ProfileSetup/ProfileJobTitle';
 import Profile from './Profile Page/Profile';
-import ProfileView from './Profile Page/ProfileView';
+import ProfileView from './Profile Page/ProfileView'; // Import ProfileView
 import Friends from './Friends Page/Friends';
 import Notifications from './Notifications Page/Notifications.jsx';
 
@@ -52,6 +52,7 @@ function App() {
             <Route path="/profile-location" element={<ProfileLocation />} />
             <Route path="/profile-job-title" element={<ProfileJobTitle />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:id" element={<ProfileView />} /> {/* Add this line */}
             <Route path="/friends" element={<Friends />} />
             <Route path="/notifications" element={<Notifications />} />
           </Routes>

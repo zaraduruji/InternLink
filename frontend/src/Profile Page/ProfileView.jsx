@@ -5,10 +5,11 @@ import defaultProfilePic from '../../public/defaultProfilePic.png';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
 import { UserContext } from '../UserContext';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const ProfileView = (props) => {
   const { id } = useParams();
-  const { user: loggedInUser, updateUser } = useContext(UserContext);
+  const { user: loggedInUser } = useContext(UserContext);
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('highlights');
   const [about, setAbout] = useState('');
@@ -17,6 +18,7 @@ const ProfileView = (props) => {
   const [connectionCount, setConnectionCount] = useState(0);
   const [pendingRequests, setPendingRequests] = useState({});
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = async () => {
     try {
@@ -24,6 +26,7 @@ const ProfileView = (props) => {
       const data = await response.json();
       setUser(data);
       setAbout(data.about || '');
+      setIsLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -115,6 +118,10 @@ const ProfileView = (props) => {
       console.error('Error:', error);
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="profile-page">

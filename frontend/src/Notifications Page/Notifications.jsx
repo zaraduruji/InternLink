@@ -45,6 +45,12 @@ const DECLINE_FRIEND_REQUEST = gql`
   }
 `;
 
+const DELETE_NOTIFICATION = gql`
+  mutation DeleteNotification($notificationId: Int!) {
+    deleteNotification(notificationId: $notificationId)
+  }
+`;
+
 function Notifications({ onClose }) {
   const { user, updateUser } = useContext(UserContext);
   const [activeTab, setActiveTab] = useState('unread');
@@ -55,6 +61,7 @@ function Notifications({ onClose }) {
   const [markAsRead] = useMutation(MARK_NOTIFICATION_AS_READ);
   const [acceptFriendRequest] = useMutation(ACCEPT_FRIEND_REQUEST);
   const [declineFriendRequest] = useMutation(DECLINE_FRIEND_REQUEST);
+  const [deleteNotification] = useMutation(DELETE_NOTIFICATION);
   const [processedRequests, setProcessedRequests] = useState(new Set());
 
   const handleMarkAsRead = async (notificationId) => {
@@ -122,6 +129,15 @@ function Notifications({ onClose }) {
     }
   };
 
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      await deleteNotification({ variables: { notificationId } });
+      refetch();
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
+
   if (loading) return <p>Loading notifications...</p>;
   if (error) return <p>Error loading notifications: {error.message}</p>;
 
@@ -156,6 +172,7 @@ function Notifications({ onClose }) {
                 onAccept={handleAcceptFriendRequest}
                 onDecline={handleDeclineFriendRequest}
                 onViewStory={handleViewStory}
+                onDelete={handleDeleteNotification}
               />
             ))}
           </div>
@@ -169,6 +186,7 @@ function Notifications({ onClose }) {
                 notification={notification}
                 isRead={true}
                 onViewStory={handleViewStory}
+                onDelete={handleDeleteNotification}
               />
             ))}
           </div>
@@ -186,26 +204,27 @@ function Notifications({ onClose }) {
   );
 }
 
-function NotificationItem({ notification, onMarkAsRead, onAccept, onDecline, onViewStory, isRead }) {
+function NotificationItem({ notification, onMarkAsRead, onAccept, onDecline, onViewStory, onDelete, isRead }) {
   return (
     <div className={`notification ${isRead ? 'read' : 'unread'}`}>
       <p className="notification-content">{notification.content}</p>
-      {!isRead && (
-        <>
-          <div className="read-indicator" onClick={() => onMarkAsRead(notification.id)}></div>
-          {notification.type === 'FRIEND_REQUEST' && (
-            <div className="friend-request-actions">
-              <button onClick={() => onAccept(notification.id, notification.friendRequestId)}>Accept</button>
-              <button onClick={() => onDecline(notification.id, notification.friendRequestId)}>Decline</button>
-            </div>
-          )}
-          {notification.type === 'STORY_UPLOAD' && (
-            <div className="story-notification-actions">
+      <div className="notification-actions">
+        {!isRead && (
+          <>
+            <div className="read-indicator" onClick={() => onMarkAsRead(notification.id)}></div>
+            {notification.type === 'FRIEND_REQUEST' && (
+              <div className="friend-request-actions">
+                <button onClick={() => onAccept(notification.id, notification.friendRequestId)}>Accept</button>
+                <button onClick={() => onDecline(notification.id, notification.friendRequestId)}>Decline</button>
+              </div>
+            )}
+            {notification.type === 'STORY_UPLOAD' && (
               <button onClick={() => onViewStory(notification.id, notification.storyId)}>View Story</button>
-            </div>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
+        <button className="delete-button" onClick={() => onDelete(notification.id)}>Delete</button>
+      </div>
     </div>
   );
 }

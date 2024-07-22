@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
 import defaultProfilePic from '../../public/defaultProfilePic.png';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Profile = () => {
   const { user, updateUser } = useContext(UserContext);
@@ -30,15 +31,20 @@ const Profile = () => {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [connectionsCount, setConnectionsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('User data:', user);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
 
-    // Fetch connections count
     fetch(`http://localhost:3000/api/users/${user.id}/connections-count`)
       .then((response) => response.json())
       .then((data) => setConnectionsCount(data.count))
-      .catch((error) => console.error('Error fetching connections count:', error));
+      .catch((error) => {
+        console.error('Error fetching connections count:', error);
+        setIsLoading(false);
+      });
   }, [user]);
 
   const handleTabClick = (tab) => {
@@ -112,7 +118,6 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    console.log('User data:', user);
     refetchConnectionCount();
   }, [user]);
 
@@ -234,6 +239,10 @@ const Profile = () => {
       console.error('Error:', error);
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="profile-page">

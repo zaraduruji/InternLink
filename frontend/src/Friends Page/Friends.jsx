@@ -4,10 +4,12 @@ import './Friends.css';
 import { UserContext } from '../UserContext';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Friends = () => {
   const { user } = useContext(UserContext);
   const [connections, setConnections] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchConnections();
@@ -18,10 +20,16 @@ const Friends = () => {
       const response = await fetch(`http://localhost:3000/api/connections/${user.id}`);
       const data = await response.json();
       setConnections(data);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching connections:', error);
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="friends-page">

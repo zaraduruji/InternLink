@@ -75,7 +75,6 @@ const typeDefs = fs.readFileSync(
   'utf8'
 );
 
-// Define resolvers
 const resolvers = {
   Query: {
     getNotifications: async (_, { userId }) => {
@@ -92,7 +91,6 @@ const resolvers = {
         where: { id: requesterId },
         select: { firstName: true, lastName: true }
       });
-
       const friendRequest = await prisma.friendRequest.create({
         data: {
           requesterId,
@@ -107,7 +105,6 @@ const resolvers = {
           }
         },
       });
-
       return friendRequest;
     },
     acceptFriendRequest: async (_, { requestId }) => {
@@ -115,16 +112,13 @@ const resolvers = {
         where: { id: requestId },
         include: { requester: true, recipient: true }
       });
-
       if (!friendRequest) {
         throw new Error('Friend request not found');
       }
-
       await prisma.friendRequest.update({
         where: { id: requestId },
         data: { status: 'ACCEPTED' },
       });
-
       await prisma.connection.create({
         data: {
           userId: friendRequest.requesterId,
@@ -132,7 +126,6 @@ const resolvers = {
           status: 'CONNECTED',
         },
       });
-
       // Create notification for the requester
       await prisma.notification.create({
         data: {
@@ -142,7 +135,6 @@ const resolvers = {
           isRead: false,
         },
       });
-
       // Update connection count for both users
       await prisma.user.update({
         where: { id: friendRequest.requesterId },
@@ -152,7 +144,6 @@ const resolvers = {
         where: { id: friendRequest.recipientId },
         data: { connectionCount: { increment: 1 } }
       });
-
       return friendRequest;
     },
     declineFriendRequest: async (_, { requestId }) => {
@@ -172,11 +163,9 @@ const resolvers = {
         where: { id: storyId },
         include: { user: true },
       });
-
       if (!story) {
         throw new Error('Story not found');
       }
-
       // Get the user's connections
       const connections = await prisma.connection.findMany({
         where: {
@@ -187,7 +176,6 @@ const resolvers = {
           status: 'CONNECTED'
         },
       });
-
       // Create notifications for all connections
       const notifications = await Promise.all(
         connections.map(async (connection) => {
@@ -203,12 +191,32 @@ const resolvers = {
           });
         })
       );
-
       // Return the first notification (you might want to adjust this based on your needs)
       return notifications[0];
     },
+    deleteNotification: async (_, { notificationId }) => {
+      try {
+        const notification = await prisma.notification.findUnique({
+          where: { id: notificationId },
+        });
+
+        if (!notification) {
+          throw new Error('Notification not found');
+        }
+
+        await prisma.notification.delete({
+          where: { id: notificationId },
+        });
+
+        return true;
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+        return false;
+      }
+    },
   },
 };
+
 // Create Apollo Server
 const server = new ApolloServer({ typeDefs, resolvers });
 

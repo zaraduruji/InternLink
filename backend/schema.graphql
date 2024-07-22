@@ -7,7 +7,8 @@ type Mutation {
   acceptFriendRequest(requestId: Int!): FriendRequest!
   declineFriendRequest(requestId: Int!): FriendRequest!
   markNotificationAsRead(notificationId: Int!): Notification!
-  createStoryNotification(userId: Int!, storyId: Int!): Notification! # New mutation
+  createStoryNotification(userId: Int!, storyId: Int!): Notification!
+  deleteNotification(notificationId: Int!): Boolean!
 }
 
 type Notification {

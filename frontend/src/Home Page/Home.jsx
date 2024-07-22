@@ -7,13 +7,14 @@ import Stories from '../StoryDisplays/Stories';
 import { UserContext } from '../UserContext';
 import Sidebar from '../Sidebar/Sidebar';
 import Notifications from '../Notifications Page/Notifications';
+import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Home = () => {
   const [darkMode, setDarkMode] = useState(true);
   const [jobListings, setJobListings] = useState([]);
   const { user } = useContext(UserContext);
   const [showNotifications, setShowNotifications] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(true);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -21,11 +22,24 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/job-listings')
-      .then(response => response.json())
-      .then(data => setJobListings(data))
-      .catch(error => console.error('Error fetching job listings:', error));
+    const fetchJobListings = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/api/job-listings');
+        const data = await response.json();
+        setJobListings(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching job listings:', error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchJobListings();
   }, []);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
