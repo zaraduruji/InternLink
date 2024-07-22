@@ -36,10 +36,6 @@ const Sidebar = ({ toggleDarkMode, darkMode }) => {
             <FontAwesomeIcon icon={faUserFriends} className="nav-icon" />
             <span className="nav-text">Friends</span>
           </Link>
-          <Link to="/notifications" className="nav-item">
-            <FontAwesomeIcon icon={faBell} className="nav-icon" />
-            <span className="nav-text">Notifications</span>
-          </Link>
           <Link to="/create-post" className="nav-item">
             <FontAwesomeIcon icon={faPlusSquare} className="nav-icon" />
             <span className="nav-text">Create Post</span>

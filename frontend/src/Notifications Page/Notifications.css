@@ -1,0 +1,215 @@
+/* Notifications.css */
+.notifications-modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    background-color: var(--bg-color, #fff);
+    color: var(--text-color, #000);
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    overflow-y: auto;
+  }
+
+  .notifications-content {
+    padding: 20px;
+  }
+
+  .notifications-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color, #eee);
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    color: var(--text-color, #000);
+  }
+
+  .tab:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+  }
+
+  .tab.active {
+    border-bottom: 2px solid var(--active-tab-color, #007bff);
+    color: var(--active-tab-color, #007bff);
+  }
+
+  .notifications-section {
+    margin-bottom: 20px;
+  }
+
+  .notifications-section h3 {
+    font-size: 14px;
+    color: var(--section-header-color, #888);
+    margin-bottom: 10px;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color, #000);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  .close-button:hover {
+    transform: scale(1.1);
+    color: var(--active-tab-color, #007bff);
+  }
+
+  .notification {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color, #eee);
+    position: relative;
+    background-color: var(--notification-bg, transparent);
+    transition: background-color 0.2s ease;
+    color: var(--text-color, #000);
+  }
+
+  .notification:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+  }
+
+  .read-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #007bff;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .read-indicator:hover {
+    transform: scale(1.2);
+  }
+
+  .notification.read .read-indicator {
+    background-color: #007bff;
+  }
+
+  .friend-request-actions {
+    margin-top: 10px;
+  }
+
+  .friend-request-actions button {
+    margin-right: 10px;
+    background-color: var(--button-bg, #007bff);
+    color: var(--button-text, #fff);
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .friend-request-actions button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  .friend-request-actions button:active {
+    transform: translateY(0);
+  }
+
+  .notifications-bell {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001;
+    color: var(--icon-color, #000);
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+
+  .notifications-bell:hover {
+    color: red;
+    transform: scale(1.2);
+  }
+
+  .notifications-bell:active {
+    transform: scale(1.1);
+  }
+
+  /* Dark mode styles */
+  .dark-mode .notifications-modal {
+    --bg-color: #333;
+    --text-color: #fff;
+    --border-color: #555;
+    --notification-bg: #444;
+    --button-bg: #007bff;
+    --button-text: #fff;
+    --icon-color: #fff;
+  }
+
+  .dark-mode .notifications-bell {
+    color: #fff;
+  }
+
+  .dark-mode .notifications-bell:hover {
+    color: red;
+  }
+
+  .dark-mode .tab {
+    color: #fff;
+  }
+
+  .dark-mode .notification {
+    color: #fff;
+  }
+
+  /* Light mode styles */
+  .light-mode .notifications-modal {
+    --bg-color: #fff;
+    --text-color: #000;
+    --border-color: #eee;
+    --notification-bg: transparent;
+    --button-bg: #007bff;
+    --button-text: #fff;
+    --icon-color: #000;
+  }
+
+  .light-mode .notifications-bell:hover {
+    color: red;
+  }
+
+  .light-mode .tab {
+    color: #000;
+  }
+
+  .light-mode .notification {
+    color: #000;
+  }
+
+  /* Optional: Add a shake animation for new notifications */
+  @keyframes bellShake {
+    0% { transform: rotate(0) scale(1.2); }
+    15% { transform: rotate(5deg) scale(1.2); }
+    30% { transform: rotate(-5deg) scale(1.2); }
+    45% { transform: rotate(4deg) scale(1.2); }
+    60% { transform: rotate(-4deg) scale(1.2); }
+    75% { transform: rotate(2deg) scale(1.2); }
+    85% { transform: rotate(-2deg) scale(1.2); }
+    92% { transform: rotate(1deg) scale(1.2); }
+    100% { transform: rotate(0) scale(1.2); }
+  }
+
+  .notifications-bell.has-new {
+    animation: bellShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+
+  .notifications-bell.has-new:hover {
+    animation: none;
+    transform: scale(1.2);
+    color: red;
+  }

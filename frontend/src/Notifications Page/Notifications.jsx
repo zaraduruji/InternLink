@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { useQuery, useMutation, gql } from '@apollo/client';
 import { UserContext } from '../UserContext';
+import './Notifications.css';
 
 const GET_NOTIFICATIONS = gql`
   query GetNotifications($userId: Int!) {
@@ -42,8 +43,9 @@ const DECLINE_FRIEND_REQUEST = gql`
   }
 `;
 
-function Notifications() {
+function Notifications({ onClose }) {
   const { user, updateUser } = useContext(UserContext);
+  const [activeTab, setActiveTab] = useState('unread');
   const { loading, error, data, refetch } = useQuery(GET_NOTIFICATIONS, {
     variables: { userId: user.id },
   });
@@ -78,7 +80,7 @@ function Notifications() {
       setProcessedRequests((prev) => new Set(prev).add(friendRequestId));
       await handleMarkAsRead(notificationId);
       refetch();
-      refetchUser();  // Refetch user data to update connection count
+      refetchUser();
     } catch (error) {
       console.error('Error accepting friend request:', error);
     }
@@ -100,25 +102,70 @@ function Notifications() {
   if (error) return <p>Error loading notifications: {error.message}</p>;
 
   return (
-    <div className="notifications-container">
-      <h2>Notifications</h2>
-      {data.getNotifications.length === 0 ? (
-        <p>No notifications</p>
-      ) : (
-        data.getNotifications.map((notification) => (
-          <div key={notification.id} className={`notification ${notification.isRead ? 'read' : 'unread'}`}>
-            <p className="notification-content">{notification.content}</p>
-            {notification.type === 'FRIEND_REQUEST' && !notification.isRead && !processedRequests.has(notification.friendRequestId) && (
-              <div className="friend-request-actions">
-                <button onClick={() => handleAcceptFriendRequest(notification.id, notification.friendRequestId)}>Accept</button>
-                <button onClick={() => handleDeclineFriendRequest(notification.id, notification.friendRequestId)}>Decline</button>
-              </div>
-            )}
-            {!notification.isRead && (
-              <button onClick={() => handleMarkAsRead(notification.id)}>Mark as Read</button>
-            )}
+    <div className="notifications-modal">
+      <div className="notifications-content">
+        <h2>Notifications</h2>
+        <button className="close-button" onClick={onClose}>×</button>
+
+        <div className="notifications-tabs">
+          <div
+            className={`tab ${activeTab === 'unread' ? 'active' : ''}`}
+            onClick={() => setActiveTab('unread')}
+          >
+            Unread
           </div>
-        ))
+          <div
+            className={`tab ${activeTab === 'read' ? 'active' : ''}`}
+            onClick={() => setActiveTab('read')}
+          >
+            Read
+          </div>
+        </div>
+
+        {activeTab === 'unread' && (
+          <div className="notifications-section">
+            {data.getNotifications.filter(n => !n.isRead).map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                notification={notification}
+                onMarkAsRead={handleMarkAsRead}
+                onAccept={handleAcceptFriendRequest}
+                onDecline={handleDeclineFriendRequest}
+              />
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'read' && (
+          <div className="notifications-section">
+            {data.getNotifications.filter(n => n.isRead).map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                notification={notification}
+                isRead={true}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NotificationItem({ notification, onMarkAsRead, onAccept, onDecline, isRead }) {
+  return (
+    <div className={`notification ${isRead ? 'read' : 'unread'}`}>
+      <p className="notification-content">{notification.content}</p>
+      {!isRead && (
+        <>
+          <div className="read-indicator" onClick={() => onMarkAsRead(notification.id)}></div>
+          {notification.type === 'FRIEND_REQUEST' && (
+            <div className="friend-request-actions">
+              <button onClick={() => onAccept(notification.id, notification.friendRequestId)}>Accept</button>
+              <button onClick={() => onDecline(notification.id, notification.friendRequestId)}>Decline</button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
