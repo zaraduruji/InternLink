@@ -9,7 +9,7 @@ import Sidebar from '../Sidebar/Sidebar';
 import Notifications from '../Notifications Page/Notifications';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
-const Home = () => {
+const Home = ({ openCreatePostModal }) => {
   const [darkMode, setDarkMode] = useState(true);
   const [jobListings, setJobListings] = useState([]);
   const { user } = useContext(UserContext);
@@ -43,7 +43,11 @@ const Home = () => {
 
   return (
     <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
-      <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+      <Sidebar
+        toggleDarkMode={toggleDarkMode}
+        darkMode={darkMode}
+        openCreatePostModal={openCreatePostModal}
+      />
       <main className="main-content">
         {/* Notifications bell */}
         <div className="notifications-bell" onClick={() => setShowNotifications(!showNotifications)}>

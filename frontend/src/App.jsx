@@ -10,13 +10,13 @@ import ProfileName from './ProfileSetup/ProfileName';
 import ProfileLocation from './ProfileSetup/ProfileLocation';
 import ProfileJobTitle from './ProfileSetup/ProfileJobTitle';
 import Profile from './Profile Page/Profile';
-import ProfileView from './Profile Page/ProfileView'; // Import ProfileView
+import ProfileView from './Profile Page/ProfileView';
 import Friends from './Friends Page/Friends';
 import Notifications from './Notifications Page/Notifications.jsx';
+import CreatePost from './CreatePost/CreatePost.jsx';
 
-// Create an instance of ApolloClient
 const client = new ApolloClient({
-  uri: 'http://localhost:3000/graphql', // Your backend GraphQL endpoint
+  uri: 'http://localhost:3000/graphql',
   cache: new InMemoryCache()
 });
 
@@ -31,9 +31,14 @@ function App() {
     }
   });
 
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+
   const updateUser = (newUser) => {
     setUser(newUser);
   };
+
+  const openCreatePostModal = () => setIsCreatePostModalOpen(true);
+  const closeCreatePostModal = () => setIsCreatePostModalOpen(false);
 
   useEffect(() => {
     localStorage.setItem('user', JSON.stringify(user));
@@ -43,16 +48,17 @@ function App() {
     <ApolloProvider client={client}>
       <UserContext.Provider value={{ user, updateUser }}>
         <Router>
+          <CreatePost isOpen={isCreatePostModalOpen} onClose={closeCreatePostModal} />
           <Routes>
             <Route path="/" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/home" element={<Home openCreatePostModal={openCreatePostModal} />} />
             <Route path="/profile-setup" element={<ProfileName />} />
             <Route path="/profile-location" element={<ProfileLocation />} />
             <Route path="/profile-job-title" element={<ProfileJobTitle />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/profile/:id" element={<ProfileView />} /> {/* Add this line */}
+            <Route path="/profile/:id" element={<ProfileView />} />
             <Route path="/friends" element={<Friends />} />
             <Route path="/notifications" element={<Notifications />} />
           </Routes>
