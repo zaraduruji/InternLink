@@ -659,6 +659,111 @@ app.post('/logout', (req, res) => {
   });
 });
 
+// GET all posts
+app.get('/api/posts', async (req, res) => {
+  try {
+    const posts = await prisma.post.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profilePicture: true,
+          },
+        },
+        comments: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching posts' });
+  }
+});
+
+// POST a new post
+app.post('/api/posts', upload.single('image'), async (req, res) => {
+  console.log('Received post request:', req.body);
+  console.log('File:', req.file);
+
+  const { content, userId } = req.body;
+
+  if (!content || !userId) {
+    return res.status(400).json({ error: 'Content and userId are required' });
+  }
+
+  try {
+    let imageUrl = null;
+    if (req.file) {
+      console.log('Attempting to upload file to Cloudinary');
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { resource_type: 'auto' },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              reject(error);
+            } else {
+              console.log('Cloudinary upload successful:', result);
+              resolve(result);
+            }
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+      imageUrl = result.secure_url;
+    }
+
+    console.log('Creating new post with imageUrl:', imageUrl);
+    const newPost = await prisma.post.create({
+      data: {
+        content,
+        imageUrl,
+        userId: parseInt(userId, 10),
+        likeCount: 0,
+      },
+    });
+
+    console.log('Created new post:', newPost);
+    res.status(201).json(newPost);
+  } catch (error) {
+    console.error('Error creating post:', error);
+    res.status(400).json({ error: 'Error creating post', details: error.message });
+  }
+});
+
+
+// DELETE a post
+app.delete('/api/posts/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.post.delete({
+      where: { id: parseInt(id, 10) },
+    });
+    res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ error: 'Error deleting post' });
+  }
+});
+
+// UPDATE a post
+app.put('/api/posts/:id', async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+  try {
+    const updatedPost = await prisma.post.update({
+      where: { id: parseInt(id, 10) },
+      data: { content },
+    });
+    res.json(updatedPost);
+  } catch (error) {
+    res.status(400).json({ error: 'Error updating post' });
+  }
+});
+
 async function startServer() {
   await server.start();
   server.applyMiddleware({ app });

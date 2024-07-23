@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { usePosts } from '../PostContext';
+import { UserContext } from '../UserContext';
 import './CreatePost.css';
 
 function CreatePost({ isOpen, onClose }) {
   const [postContent, setPostContent] = useState('');
   const [image, setImage] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addPost } = usePosts();
+  const { user } = useContext(UserContext);
 
   const handleContentChange = (e) => setPostContent(e.target.value);
 
@@ -15,20 +18,31 @@ function CreatePost({ isOpen, onClose }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newPost = {
-      id: Date.now(),
-      content: postContent,
-      image: image,
-      timestamp: new Date().toISOString(),
-      likeCount: 0,
-      comments: []
-    };
-    addPost(newPost);
-    setPostContent('');
-    setImage(null);
-    onClose();
+    if (!postContent.trim()) return; // Prevent empty posts
+
+    setIsSubmitting(true);
+
+    const formData = new FormData();
+    formData.append('content', postContent);
+    formData.append('userId', user.id);
+    if (image) {
+      console.log('Appending image:', image);
+      formData.append('image', image);
+    }
+
+    try {
+      console.log('FormData content before submission:', Array.from(formData.entries()));
+      await addPost(formData);
+      setPostContent('');
+      setImage(null);
+      onClose();
+    } catch (error) {
+      console.error('Failed to create post:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -45,7 +59,9 @@ function CreatePost({ isOpen, onClose }) {
             placeholder="What do you want to talk about?"
           />
           <input type="file" onChange={handleImageUpload} accept="image/*" />
-          <button type="submit">Post</button>
+          <button type="submit" disabled={isSubmitting || !postContent.trim()}>
+            {isSubmitting ? 'Posting...' : 'Post'}
+          </button>
         </form>
       </div>
     </div>

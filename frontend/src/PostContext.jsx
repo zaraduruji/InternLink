@@ -1,26 +1,55 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
 const PostContext = createContext();
 
 export function PostProvider({ children }) {
   const [posts, setPosts] = useState([]);
 
-  const addPost = (newPost) => {
-    setPosts(prevPosts => [newPost, ...prevPosts]);
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/posts');
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
   };
 
-  const deletePost = (postId) => {
-    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+  const addPost = async (newPost) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/posts', newPost);
+      setPosts(prevPosts => [response.data, ...prevPosts]);
+    } catch (error) {
+      console.error('Error adding post:', error);
+    }
   };
 
-  const updatePost = (updatedPost) => {
-    setPosts(prevPosts => prevPosts.map(post =>
-      post.id === updatedPost.id ? updatedPost : post
-    ));
+  const deletePost = async (postId) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/posts/${postId}`);
+      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
+  };
+
+  const updatePost = async (updatedPost) => {
+    try {
+      const response = await axios.put(`http://localhost:3000/api/posts/${updatedPost.id}`, updatedPost);
+      setPosts(prevPosts => prevPosts.map(post =>
+        post.id === updatedPost.id ? response.data : post
+      ));
+    } catch (error) {
+      console.error('Error updating post:', error);
+    }
   };
 
   return (
-    <PostContext.Provider value={{ posts, addPost, deletePost, updatePost }}>
+    <PostContext.Provider value={{ posts, addPost, deletePost, updatePost, fetchPosts }}>
       {children}
     </PostContext.Provider>
   );

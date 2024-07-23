@@ -13,17 +13,36 @@ import LoadingScreen from '../LoadingScreen/LoadingScreen';
 const Home = ({ openCreatePostModal }) => {
   const [darkMode, setDarkMode] = useState(true);
   const { user } = useContext(UserContext);
-  const { posts } = usePosts();
+  const { posts, fetchPosts, loading, error } = usePosts();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    console.log('Home component mounted');
+    const loadPosts = async () => {
+      try {
+        await fetchPosts();
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      }
+    };
+    loadPosts();
+  }, [fetchPosts]);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.body.classList.toggle('light-mode');
   };
 
-  if (isLoading) {
+  console.log('Rendering Home component', { posts, loading, error, user });
+
+  if (loading) {
+    console.log('Loading posts...');
     return <LoadingScreen />;
+  }
+
+  if (error) {
+    console.error('Error loading posts:', error);
+    return <div>Error loading posts. Please try again later.</div>;
   }
 
   return (
@@ -38,44 +57,46 @@ const Home = ({ openCreatePostModal }) => {
         <div className="notifications-bell" onClick={() => setShowNotifications(!showNotifications)}>
           <FontAwesomeIcon icon={faBell} />
         </div>
-
         {/* Notifications modal */}
         {showNotifications && (
           <Notifications onClose={() => setShowNotifications(false)} />
         )}
-
         <div className="stories-lineup">
           <Stories currentUser={user} />
         </div>
         <div className="posts-container">
-          {posts.map((post, index) => (
-            <div key={post.id} className="post">
-              <div className="post-header">
-                <img src={user.profilePicture} alt={user.name} className="post-profile-pic" />
-                <div className="post-info">
-                  <span className="post-user-name">{user.name}</span>
-                  <span className="post-timestamp">{new Date(post.timestamp).toLocaleString()}</span>
+          {posts.length === 0 ? (
+            <p>No posts available.</p>
+          ) : (
+            posts.map((post) => (
+              <div key={post.id} className="post">
+                <div className="post-header">
+                  <img src={post.userProfilePicture || user.profilePicture} alt={post.uploaderName || user.name} className="post-profile-pic" />
+                  <div className="post-info">
+                    <span className="post-user-name">{post.uploaderName || user.name}</span>
+                    <span className="post-timestamp">{new Date(post.timestamp).toLocaleString()}</span>
+                  </div>
+                </div>
+                <div className="post-description">{post.content}</div>
+                {post.imageUrl && <img src={post.imageUrl} alt="Post" className="post-image" />}
+                <div className="post-footer">
+                  <div className="post-actions">
+                    <FontAwesomeIcon icon={faThumbsUp} className="post-action-icon" />
+                    <span>{post.likeCount}</span>
+                    <FontAwesomeIcon icon={faComment} className="post-action-icon" />
+                  </div>
+                  <div className="post-comments">
+                    {post.comments && post.comments.map((comment, index) => (
+                      <div key={index} className="comment">
+                        <span className="comment-content">{comment.content}</span>
+                        <span className="comment-timestamp">{new Date(comment.timestamp).toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="post-description">{post.content}</div>
-              {post.image && <img src={URL.createObjectURL(post.image)} alt="Post" className="post-image" />}
-              <div className="post-footer">
-                <div className="post-actions">
-                  <FontAwesomeIcon icon={faThumbsUp} className="post-action-icon" />
-                  <span>{post.likeCount}</span>
-                  <FontAwesomeIcon icon={faComment} className="post-action-icon" />
-                </div>
-                <div className="post-comments">
-                  {post.comments.map((comment, index) => (
-                    <div key={index} className="comment">
-                      <span className="comment-content">{comment.content}</span>
-                      <span className="comment-timestamp">{new Date(comment.timestamp).toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </main>
       <aside className="suggested-connections">
