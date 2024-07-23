@@ -74,7 +74,9 @@ const Home = ({ openCreatePostModal }) => {
                   <img src={post.userProfilePicture || user.profilePicture} alt={post.uploaderName || user.name} className="post-profile-pic" />
                   <div className="post-info">
                     <span className="post-user-name">{post.uploaderName || user.name}</span>
-                    <span className="post-timestamp">{new Date(post.timestamp).toLocaleString()}</span>
+                    <span className="post-timestamp">
+                      {post.createdAt ? new Date(post.createdAt).toLocaleString() : 'Unknown date'}
+                    </span>
                   </div>
                 </div>
                 <div className="post-description">{post.content}</div>
