@@ -279,16 +279,16 @@ app.put('/update-profile', async (req, res) => {
   }
 });
 
-app.get('/api/job-listings', (req, res) => {
-  const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
-  fs.readFile(jsonFilePath, 'utf8', (err, data) => {
-    if (err) {
-      res.status(500).send('Error reading JSON file');
-      return;
-    }
-    res.json(JSON.parse(data));
-  });
-});
+// app.get('/api/job-listings', (req, res) => {
+//   const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
+//   fs.readFile(jsonFilePath, 'utf8', (err, data) => {
+//     if (err) {
+//       res.status(500).send('Error reading JSON file');
+//       return;
+//     }
+//     res.json(JSON.parse(data));
+//   });
+// });
 
 app.get('/api/search', async (req, res) => {
   const query = req.query.q ? req.query.q.toLowerCase() : '';
@@ -773,5 +773,59 @@ async function startServer() {
     console.log(`GraphQL endpoint: http://localhost:${port}${server.graphqlPath}`);
   });
 }
+
+app.post('/api/posts/:id/like', async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) },
+      include: { likes: true }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    const existingLike = post.likes.find(like => like.userId === parseInt(userId));
+
+    if (existingLike) {
+      // Unlike the post
+      await prisma.like.delete({
+        where: { id: existingLike.id }
+      });
+      post.likeCount -= 1;
+    } else {
+      // Like the post
+      await prisma.like.create({
+        data: {
+          userId: parseInt(userId),
+          postId: parseInt(id)
+        }
+      });
+      post.likeCount += 1;
+    }
+
+    // Update this part
+    const updatedPost = await prisma.post.update({
+      where: { id: parseInt(id) },
+      data: { likeCount: post.likeCount },
+      include: {
+        likes: {
+          select: {
+            userId: true
+          }
+        }
+      }
+    });
+    res.json(updatedPost);
+
+  } catch (error) {
+    console.error('Error liking/unliking post:', error);
+    res.status(500).json({ error: 'Error liking/unliking post' });
+  }
+});
+
 
 startServer();

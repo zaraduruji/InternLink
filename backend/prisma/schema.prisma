@@ -28,6 +28,7 @@ model User {
   posts                    Post[]
   comments                 Comment[]
   profilePicture           String?
+   likes                   Like[]
   connections              Connection[]    @relation("UserConnections")
   friendConnections        Connection[]    @relation("UserFriendConnections")
   userFriendRequests       FriendRequest[] @relation("Requesters")
@@ -143,4 +144,16 @@ model Post {
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   comments  Comment[]
+  likes     Like[]   // Add this line
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+
+  @@unique([postId, userId])
 }

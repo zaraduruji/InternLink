@@ -320,7 +320,7 @@ const Profile = () => {
       >
         <h2>Add to profile</h2>
         <hr />
-        <p>Set up your profile in minutes through linkedIn - just one click away!</p>
+        <p>Upload Your Profile Picture With LinkedIn!</p>
         <button className="modal-button">LinkedIn</button>
         <h3>OR</h3>
         <p>Manual Setup</p>

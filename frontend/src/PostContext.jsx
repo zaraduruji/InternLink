@@ -48,8 +48,21 @@ export function PostProvider({ children }) {
     }
   };
 
+  const likePost = async (postId, userId) => {
+    try {
+      const response = await axios.post(`http://localhost:3000/api/posts/${postId}/like`, { userId });
+      setPosts(prevPosts => prevPosts.map(post =>
+        post.id === postId ? { ...post, ...response.data } : post
+      ));
+      return response.data; // Return the updated post
+    } catch (error) {
+      console.error('Error liking post:', error);
+      throw error; // Rethrow the error so it can be caught in the component
+    }
+  };
+
   return (
-    <PostContext.Provider value={{ posts, addPost, deletePost, updatePost, fetchPosts }}>
+    <PostContext.Provider value={{ posts, addPost, deletePost, updatePost, fetchPosts, likePost }}>
       {children}
     </PostContext.Provider>
   );
