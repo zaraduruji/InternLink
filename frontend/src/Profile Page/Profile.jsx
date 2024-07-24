@@ -240,6 +240,17 @@ const Profile = () => {
     }
   };
 
+  const handleLinkedInSignIn = () => {
+    const clientId = '86xqalggwzcbcl';
+    const redirectUri = encodeURIComponent('http://localhost:3000/auth/linkedIn/callback');
+    const scope = encodeURIComponent('profile openid email');
+    const state = 'DCEeFWf45A53sdfKef424';
+
+    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
+
+    window.location.href = authUrl;
+  };
+
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -257,7 +268,7 @@ const Profile = () => {
             <h2>{user?.firstName || 'Your Name'} {user?.lastName}</h2>
             <p>{user?.jobTitle || 'Software Engineer'}</p>
             <p>{user?.location || 'Seattle, WA, USA'}</p>
-            <p>{connectionsCount} Connections</p> {/* Display connections count */}
+            <p>{connectionsCount} Connections</p>
             <div className="profile-buttons">
               <button className="profile-button">Contact info</button>
               <button className="profile-button" onClick={openModal}>Add profile section</button>
@@ -321,7 +332,7 @@ const Profile = () => {
         <h2>Add to profile</h2>
         <hr />
         <p>Upload Your Profile Picture With LinkedIn!</p>
-        <button className="modal-button">LinkedIn</button>
+        <button onClick={handleLinkedInSignIn}>Upload photo with LinkedIn</button>
         <h3>OR</h3>
         <p>Manual Setup</p>
         <p className="modal-subtext">Start with the basics. Filling out these sections will help you be discovered by recruiters and people you may know.</p>

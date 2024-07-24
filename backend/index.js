@@ -15,6 +15,7 @@ import { ApolloServer } from 'apollo-server-express';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { addHours } from 'date-fns';
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -827,5 +828,57 @@ app.post('/api/posts/:id/like', async (req, res) => {
   }
 });
 
+const CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
+const CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
+const REDIRECT_URI = 'http://localhost:3000/auth/linkedin/callback';
+
+app.get('/auth/linkedIn/callback', async (req, res) => {
+  try {
+    const { code, state } = req.query;
+
+    // Exchange code for access token
+    const tokenResponse = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', null, {
+      params: {
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: REDIRECT_URI,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET
+      }
+    });
+
+    const accessToken = tokenResponse.data.access_token;
+
+    // Fetch user profile
+    const profileResponse = await axios.get('https://api.linkedin.com/v2/me', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    // Fetch profile picture
+    const profilePictureResponse = await axios.get('https://api.linkedin.com/v2/me?projection=(id,profilePicture(displayImage~:playableStreams))', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    const profilePictureUrl = profilePictureResponse.data.profilePicture['displayImage~'].elements[0].identifiers[0].identifier;
+
+    // Download profile picture
+    const pictureResponse = await axios.get(profilePictureUrl, { responseType: 'arraybuffer' });
+    const buffer = Buffer.from(pictureResponse.data, 'binary');
+
+    // Here, you would typically upload this buffer to your own storage solution
+    // and update the user's profile in your database
+
+    // For this example, we'll just send back the profile data
+    res.json({
+      success: true,
+      profile: profileResponse.data,
+      profilePicture: buffer.toString('base64')
+    });
+
+  } catch (error) {
+    console.error('Detailed error in LinkedIn callback:', error);
+    res.status(500).json({ error: 'An error occurred', details: error.message });
+  }
+});
 
 startServer();

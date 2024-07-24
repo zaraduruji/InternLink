@@ -157,3 +157,4 @@ model Like {
 
   @@unique([postId, userId])
 }
+  

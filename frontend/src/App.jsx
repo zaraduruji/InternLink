@@ -5,7 +5,7 @@ import Welcome from './Welcome Page/welcome';
 import Login from './Login Page/Login';
 import Signup from './Signup Page/Signup';
 import { UserContext } from './UserContext';
-import { PostProvider } from './PostContext'; // Import the PostProvider
+import { PostProvider } from './PostContext';
 import Home from './Home Page/Home';
 import ProfileName from './ProfileSetup/ProfileName';
 import ProfileLocation from './ProfileSetup/ProfileLocation';
@@ -15,6 +15,7 @@ import ProfileView from './Profile Page/ProfileView';
 import Friends from './Friends Page/Friends';
 import Notifications from './Notifications Page/Notifications.jsx';
 import CreatePost from './CreatePost/CreatePost.jsx';
+import LinkedInCallback from './LinkedInCallback.jsx';
 
 const client = new ApolloClient({
   uri: 'http://localhost:3000/graphql',
@@ -35,7 +36,7 @@ function App() {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
 
   const updateUser = (newUser) => {
-    setUser(newUser);
+    setUser(prevUser => ({ ...prevUser, ...newUser }));
   };
 
   const openCreatePostModal = () => setIsCreatePostModalOpen(true);
@@ -48,7 +49,7 @@ function App() {
   return (
     <ApolloProvider client={client}>
       <UserContext.Provider value={{ user, updateUser }}>
-        <PostProvider> {/* Wrap the Router with PostProvider */}
+        <PostProvider>
           <Router>
             <CreatePost isOpen={isCreatePostModalOpen} onClose={closeCreatePostModal} />
             <Routes>
@@ -63,6 +64,7 @@ function App() {
               <Route path="/profile/:id" element={<ProfileView />} />
               <Route path="/friends" element={<Friends />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
             </Routes>
           </Router>
         </PostProvider>
