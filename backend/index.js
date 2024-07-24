@@ -8,6 +8,7 @@ import SequelizeStoreInit from 'connect-session-sequelize';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
+import qs from 'qs';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from 'cloudinary';
@@ -830,49 +831,54 @@ app.post('/api/posts/:id/like', async (req, res) => {
 
 const CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
 const CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
-const REDIRECT_URI = 'http://localhost:3000/auth/linkedin/callback';
+const REDIRECT_URI = 'http://localhost:3000/auth/linkedIn/callback';
 
 app.get('/auth/linkedIn/callback', async (req, res) => {
   try {
     const { code, state } = req.query;
 
+    if (!code || !state) {
+      throw new Error('Missing code or state in query parameters');
+    }
+
     // Exchange code for access token
-    const tokenResponse = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', null, {
-      params: {
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: REDIRECT_URI,
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET
+    const tokenResponse = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', qs.stringify({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: REDIRECT_URI,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET
+    }), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
 
     const accessToken = tokenResponse.data.access_token;
 
     // Fetch user profile
-    const profileResponse = await axios.get('https://api.linkedin.com/v2/me', {
+    const profileResponse = await axios.get('https://api.linkedin.com/v2/userinfo', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
 
     // Fetch profile picture
-    const profilePictureResponse = await axios.get('https://api.linkedin.com/v2/me?projection=(id,profilePicture(displayImage~:playableStreams))', {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    });
+    // const profilePictureResponse = await axios.get('https://api.linkedin.com/v2/me?projection=(id,profilePicture(displayImage~:playableStreams))', {
+    //   headers: { Authorization: `Bearer ${accessToken}` }
+    // });
 
-    const profilePictureUrl = profilePictureResponse.data.profilePicture['displayImage~'].elements[0].identifiers[0].identifier;
+    console.log(profileResponse)
 
-    // Download profile picture
-    const pictureResponse = await axios.get(profilePictureUrl, { responseType: 'arraybuffer' });
-    const buffer = Buffer.from(pictureResponse.data, 'binary');
+    const profilePictureUrl = profileResponse.data.picture;
 
-    // Here, you would typically upload this buffer to your own storage solution
-    // and update the user's profile in your database
+    // // Download profile picture
+    // const pictureResponse = await axios.get(profilePictureUrl, { responseType: 'arraybuffer' });
+    // const buffer = Buffer.from(pictureResponse.data, 'binary');
 
-    // For this example, we'll just send back the profile data
+    // // Respond with profile data and profile picture
     res.json({
       success: true,
       profile: profileResponse.data,
-      profilePicture: buffer.toString('base64')
+      profilePicture: profilePictureUrl
     });
 
   } catch (error) {
@@ -880,5 +886,6 @@ app.get('/auth/linkedIn/callback', async (req, res) => {
     res.status(500).json({ error: 'An error occurred', details: error.message });
   }
 });
+
 
 startServer();

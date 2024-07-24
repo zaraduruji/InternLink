@@ -242,13 +242,14 @@ const Profile = () => {
 
   const handleLinkedInSignIn = () => {
     const clientId = '86xqalggwzcbcl';
-    const redirectUri = encodeURIComponent('http://localhost:3000/auth/linkedIn/callback');
-    const scope = encodeURIComponent('profile openid email');
     const state = 'DCEeFWf45A53sdfKef424';
+const redirectUri = encodeURIComponent('http://localhost:3000/auth/linkedIn/callback');
+const scope = encodeURIComponent('profile openid email'); // Adjust scopes as needed
 
-    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
+const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
 
-    window.location.href = authUrl;
+window.location.href = authUrl;
+
   };
 
   if (isLoading) {
