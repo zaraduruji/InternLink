@@ -8,7 +8,24 @@ import defaultProfilePic from '../../public/defaultProfilePic.png';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Profile = () => {
-  const { user, updateUser } = useContext(UserContext);
+  const [user, setUser] = useState(() => {
+    // Initialize user state from localStorage
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
+    }
+  });
+  const updateUser = (newUserData) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, ...newUserData };
+      // Store updated user in localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
   const [activeTab, setActiveTab] = useState('highlights');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [photoModalIsOpen, setPhotoModalIsOpen] = useState(false);

@@ -4,17 +4,40 @@ import './Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell } from '@fortawesome/free-solid-svg-icons';
 import Stories from '../StoryDisplays/Stories';
-import { UserContext } from '../UserContext';
-import { usePosts } from '../PostContext';
 import Sidebar from '../Sidebar/Sidebar';
 import Notifications from '../Notifications Page/Notifications';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 import Post from '../Post/Post';
+import axios from 'axios';
+import CommentModal from '../CommentModal/CommentModal';
 
 const Home = ({ openCreatePostModal }) => {
   const [darkMode, setDarkMode] = useState(true);
-  const { user } = useContext(UserContext);
-  const { posts, fetchPosts, loading, error } = usePosts();
+  const [user, setUser] = useState(() => {
+    // Initialize user state from localStorage
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
+    }
+  });
+  const [posts, setPosts] = useState([]);
+  const [post, setPost] = useState(null);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/posts');
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
@@ -27,24 +50,24 @@ const Home = ({ openCreatePostModal }) => {
       }
     };
     loadPosts();
-  }, [fetchPosts]);
+  }, []);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.body.classList.toggle('light-mode');
   };
 
-  console.log('Rendering Home component', { posts, loading, error, user });
+  // console.log('Rendering Home component', { posts, loading, error, user });
 
-  if (loading) {
-    console.log('Loading posts...');
-    return <LoadingScreen />;
-  }
+  // if (loading) {
+  //   console.log('Loading posts...');
+  //   return <LoadingScreen />;
+  // }
 
-  if (error) {
-    console.error('Error loading posts:', error);
-    return <div>Error loading posts. Please try again later.</div>;
-  }
+  // if (error) {
+  //   console.error('Error loading posts:', error);
+  //   return <div>Error loading posts. Please try again later.</div>;
+  // }
 
   return (
     <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
@@ -53,6 +76,7 @@ const Home = ({ openCreatePostModal }) => {
         darkMode={darkMode}
         openCreatePostModal={openCreatePostModal}
       />
+      {post && <CommentModal onTap={()=>setPost(null)} post={post}/>}
       <main className="main-content">
         <div className="notifications-bell" onClick={() => setShowNotifications(!showNotifications)}>
           <FontAwesomeIcon icon={faBell} />
@@ -68,7 +92,7 @@ const Home = ({ openCreatePostModal }) => {
             <p>No posts available.</p>
           ) : (
             posts.map((post) => (
-              <Post key={post.id} post={post} currentUser={user} />
+              <Post key={post.id} post={post} onShow={setPost} currentUser={user} />
             ))
           )}
         </div>

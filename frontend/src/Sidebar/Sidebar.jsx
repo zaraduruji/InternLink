@@ -10,7 +10,6 @@ import { UserContext } from '../UserContext';
 const Sidebar = ({ toggleDarkMode, darkMode, openCreatePostModal }) => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const { user } = useContext(UserContext);
 
   const toggleMore = () => {
     setIsMoreOpen(!isMoreOpen);

@@ -6,9 +6,17 @@ import './CreatePost.css';
 function CreatePost({ isOpen, onClose }) {
   const [postContent, setPostContent] = useState('');
   const [image, setImage] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { addPost } = usePosts();
-  const { user } = useContext(UserContext);
+  const addPost = async (newPost) => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/posts', newPost);
+      setPosts(prevPosts => [response.data, ...prevPosts]);
+    } catch (error) {
+      console.error('Error adding post:', error);
+    }
+  };
+  const {user}= JSON.parse(localStorage.getItem('user'))
 
   const handleContentChange = (e) => setPostContent(e.target.value);
 

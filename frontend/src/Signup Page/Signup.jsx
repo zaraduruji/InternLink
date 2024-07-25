@@ -7,7 +7,6 @@ import { UserContext } from '../UserContext';
 
 const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
   const navigate = useNavigate();
-  const { updateUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState("");
@@ -32,7 +31,7 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
       if (response.ok) {
         const data = await response.json();
         console.log('Signup successful:', data);
-        updateUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
         navigate("/profile-setup");
         if (data.error) {
           setError(data.error);

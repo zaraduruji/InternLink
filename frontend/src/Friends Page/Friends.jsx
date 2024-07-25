@@ -7,7 +7,7 @@ import SearchModal from '../SearchModal/SearchModal';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Friends = () => {
-  const { user } = useContext(UserContext);
+  const user= JSON.parse(localStorage.getItem('user'))
   const [connections, setConnections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 

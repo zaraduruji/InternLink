@@ -674,7 +674,16 @@ app.get('/api/posts', async (req, res) => {
             profilePicture: true,
           },
         },
-        comments: true,
+        likes: {
+          select: {
+            userId: true
+          }
+        },
+        comments: {
+          include: {
+          user: true // Assuming you want to include user information
+        }
+      }
       },
       orderBy: {
         createdAt: 'desc',
@@ -775,6 +784,58 @@ async function startServer() {
     console.log(`GraphQL endpoint: http://localhost:${port}${server.graphqlPath}`);
   });
 }
+app.post('/api/posts/:id/comments', async (req, res) => {
+  const { id } = req.params;
+  const { userId, content } = req.body;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    const newComment = await prisma.comment.create({
+      data: {
+        content: content,
+        userId: parseInt(userId),
+        postId: parseInt(id)
+      }
+    });
+
+    res.status(201).json(newComment);
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    res.status(500).json({ error: 'Error adding comment' });
+  }
+});
+app.get('/api/posts/:id/comments', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        comments: {
+          include: {
+            user: true // Assuming you want to include user information
+          }
+        }
+      }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    res.json(post.comments);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    res.status(500).json({ error: 'Error fetching comments' });
+  }
+});
 
 app.post('/api/posts/:id/like', async (req, res) => {
   const { id } = req.params;
@@ -789,7 +850,6 @@ app.post('/api/posts/:id/like', async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
     }
-
     const existingLike = post.likes.find(like => like.userId === parseInt(userId));
 
     if (existingLike) {
@@ -821,6 +881,7 @@ app.post('/api/posts/:id/like', async (req, res) => {
         }
       }
     });
+    console.log(updatedPost)
     res.json(updatedPost);
 
   } catch (error) {

@@ -48,8 +48,6 @@ function App() {
 
   return (
     <ApolloProvider client={client}>
-      <UserContext.Provider value={{ user, updateUser }}>
-        <PostProvider>
           <Router>
             <CreatePost isOpen={isCreatePostModalOpen} onClose={closeCreatePostModal} />
             <Routes>
@@ -67,8 +65,6 @@ function App() {
               <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
             </Routes>
           </Router>
-        </PostProvider>
-      </UserContext.Provider>
     </ApolloProvider>
   );
 }

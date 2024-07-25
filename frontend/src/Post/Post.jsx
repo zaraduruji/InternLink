@@ -1,24 +1,37 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart as farHeart } from '@fortawesome/free-regular-svg-icons';
 import { faHeart as fasHeart, faComment } from '@fortawesome/free-solid-svg-icons';
-import { usePosts } from '../PostContext';
+import axios from 'axios';
 import './Post.css';
 
-function Post({ post, currentUser }) {
-  const { likePost } = usePosts();
+function Post({ post, currentUser, onShow }) {
+  const [isLiked, setIsLiked] = useState(post.likes && post.likes.some(like =>like.userId == currentUser.id));
+  const [likeCount, setLikeCount] = useState(post.likeCount || 0);
+
+  useEffect(() => {
+    setIsLiked(post.likes && post.likes.some(like =>like.userId == currentUser.id));
+  }, [post.likes, currentUser.id]);
+
+  const likePost = async (postId, userId) => {
+    try {
+      const response = await axios.post(`http://localhost:3000/api/posts/${postId}/like`, { userId });
+      return response.data; // Return the updated post
+    } catch (error) {
+      console.error('Error liking post:', error);
+      throw error; // Rethrow the error so it can be caught in the component
+    }
+  };
 
   const handleLike = async () => {
     try {
       const updatedPost = await likePost(post.id, currentUser.id);
-      Object.assign(post, updatedPost);
+      setIsLiked(!isLiked);
+      setLikeCount(updatedPost.likeCount);
     } catch (error) {
       console.error('Error liking post:', error);
     }
   };
-
-  const isLiked = post.likes && post.likes.some(like => like.userId === currentUser.id);
-  const likeCount = post.likeCount || 0;
 
   return (
     <div className="post">
@@ -48,14 +61,15 @@ function Post({ post, currentUser }) {
             />
           </button>
           <span>{likeCount} {likeCount === 1 ? 'like' : 'likes'}</span>
-          <FontAwesomeIcon icon={faComment} className="post-action-icon" />
+         <button onClick={()=>onShow(post)}><FontAwesomeIcon icon={faComment} className="post-action-icon" /></button>
+
         </div>
         <div className="post-comments">
           {post.comments && post.comments.map((comment, index) => (
             <div key={index} className="comment">
               <span className="comment-content">{comment.content}</span>
               <span className="comment-timestamp">
-                {new Date(comment.timestamp).toLocaleString()}
+                {new Date(comment.createdAt).toLocaleString()}
               </span>
             </div>
           ))}
