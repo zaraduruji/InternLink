@@ -52,7 +52,24 @@ const DELETE_NOTIFICATION = gql`
 `;
 
 function Notifications({ onClose }) {
-  const { user, updateUser } = useContext(UserContext);
+  const [user, setUser] = useState(() => {
+    // Initialize user state from localStorage
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
+    }
+  });
+  const updateUser = (newUserData) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, ...newUserData };
+      // Store updated user in localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
   const [activeTab, setActiveTab] = useState('unread');
   const [viewingStories, setViewingStories] = useState(null);
   const { loading, error, data, refetch } = useQuery(GET_NOTIFICATIONS, {

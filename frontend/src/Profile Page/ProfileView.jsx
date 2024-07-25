@@ -9,7 +9,7 @@ import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const ProfileView = (props) => {
   const { id } = useParams();
-  const {user: loggedInUser}= JSON.parse(localStorage.getItem('user'))
+  const loggedInUser= JSON.parse(localStorage.getItem('user'))
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('highlights');
   const [about, setAbout] = useState('');
