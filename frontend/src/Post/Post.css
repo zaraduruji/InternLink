@@ -4,14 +4,14 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #333; /* Faint line demarcating each post */
+  border-bottom: 1px solid #333;
 }
 
 .post-header {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  position: relative; /* Ensure relative positioning for dropdown */
+  position: relative;
 }
 
 .post-profile-pic {
@@ -19,7 +19,9 @@
   height: 50px;
   border-radius: 50%;
   margin-right: 10px;
+  object-fit: cover;
 }
+
 
 .post-info {
   display: flex;

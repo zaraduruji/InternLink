@@ -1,13 +1,12 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Friends.css';
-import { UserContext } from '../UserContext';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Friends = () => {
-  const user= JSON.parse(localStorage.getItem('user'))
+  const user = JSON.parse(localStorage.getItem('user'));
   const [connections, setConnections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -27,6 +26,17 @@ const Friends = () => {
     }
   };
 
+  const handleRemoveConnection = async (friendId) => {
+    try {
+      await fetch(`http://localhost:3000/api/connections/${user.id}/${friendId}`, {
+        method: 'DELETE',
+      });
+      setConnections(connections.filter((connection) => connection.friendId !== friendId));
+    } catch (error) {
+      console.error('Error removing connection:', error);
+    }
+  };
+
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -37,15 +47,27 @@ const Friends = () => {
       <SearchModal />
       <div className="friends-content">
         <h2>Your Connections</h2>
-        <ul>
+        <div className="connections-list">
           {connections.map((connection) => (
-            <li key={connection.id}>
-              <Link to={`/profile/${connection.friendId}`}>
-                {connection.friend.firstName} {connection.friend.lastName}
-              </Link>
-            </li>
+            <div key={connection.id} className="connection-item">
+              <img
+                src={connection.friend.profilePicture || '/default-profile-pic.png'}
+                alt={`${connection.friend.firstName} ${connection.friend.lastName}`}
+                className="profile-pic"
+              />
+              <div className="connection-info">
+                <Link to={`/profile/${connection.friendId}`} className="connection-name">
+                  {connection.friend.firstName} {connection.friend.lastName}
+                </Link>
+                <p className="connection-role">{connection.friend.jobTitle}</p> {/* Ensure this is the correct field name */}
+                <p className="connection-location">{connection.friend.location}</p>
+              </div>
+              <button className="remove-button" onClick={() => handleRemoveConnection(connection.friendId)}>
+                Remove Connection
+              </button>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );

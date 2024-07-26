@@ -6,7 +6,7 @@ const CommentModal = ({ post, onTap }) => {
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState(post.comments);
   const user = JSON.parse(localStorage.getItem('user'));
-  const userId = JSON.parse(localStorage.getItem('user')).id
+  const userId = user.id;
 
   const addComment = async (content) => {
     try {
@@ -15,9 +15,8 @@ const CommentModal = ({ post, onTap }) => {
         content
       });
       console.log('Comment added:', response.data);
-      onTap()
-      window.location.reload();
-      setComments((prev) => [...prev, { ...user, content: commentText, createdAt: new Date() }]);
+      setComments((prev) => [...prev, { ...response.data, user }]); // Update comments state
+      setCommentText('');
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -26,7 +25,6 @@ const CommentModal = ({ post, onTap }) => {
   const handleAddComment = (e) => {
     if (e.key === 'Enter' && commentText.trim() !== '') {
       addComment(commentText);
-      setCommentText('');
     }
   };
 

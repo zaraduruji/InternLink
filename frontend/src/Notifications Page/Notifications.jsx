@@ -53,7 +53,6 @@ const DELETE_NOTIFICATION = gql`
 
 function Notifications({ onClose }) {
   const [user, setUser] = useState(() => {
-    // Initialize user state from localStorage
     const storedUser = localStorage.getItem('user');
     try {
       return storedUser ? JSON.parse(storedUser) : null;
@@ -62,14 +61,15 @@ function Notifications({ onClose }) {
       return null;
     }
   });
+
   const updateUser = (newUserData) => {
     setUser(prevUser => {
       const updatedUser = { ...prevUser, ...newUserData };
-      // Store updated user in localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     });
   };
+
   const [activeTab, setActiveTab] = useState('unread');
   const [viewingStories, setViewingStories] = useState(null);
   const { loading, error, data, refetch } = useQuery(GET_NOTIFICATIONS, {
@@ -162,7 +162,7 @@ function Notifications({ onClose }) {
     <div className="notifications-modal">
       <div className="notifications-content">
         <h2>Notifications</h2>
-        <button className="close-button" onClick={onClose}>×</button>
+        <button className="close-buttonn" onClick={onClose}>×</button>
 
         <div className="notifications-tabs">
           <div
@@ -214,7 +214,7 @@ function Notifications({ onClose }) {
           stories={viewingStories}
           onClose={() => setViewingStories(null)}
           currentUser={user}
-          onDeleteStory={() => {}} // Add a delete handler if needed
+          onDeleteStory={() => {}}
         />
       )}
     </div>
@@ -231,16 +231,16 @@ function NotificationItem({ notification, onMarkAsRead, onAccept, onDecline, onV
             <div className="read-indicator" onClick={() => onMarkAsRead(notification.id)}></div>
             {notification.type === 'FRIEND_REQUEST' && (
               <div className="friend-request-actions">
-                <button onClick={() => onAccept(notification.id, notification.friendRequestId)}>Accept</button>
-                <button onClick={() => onDecline(notification.id, notification.friendRequestId)}>Decline</button>
+                <button className="accept-button" onClick={() => onAccept(notification.id, notification.friendRequestId)}>Accept</button>
+                <button className="decline-button" onClick={() => onDecline(notification.id, notification.friendRequestId)}>Decline</button>
               </div>
             )}
             {notification.type === 'STORY_UPLOAD' && (
-              <button onClick={() => onViewStory(notification.id, notification.storyId)}>View Story</button>
+              <button className="view-button" onClick={() => onViewStory(notification.id, notification.storyId)}>View Story</button>
             )}
           </>
         )}
-        <button className="delete-button" onClick={() => onDelete(notification.id)}>Delete</button>
+        <button className="delete-button" onClick={() => onDelete(notification.id)}>Delete 🗑️</button>
       </div>
     </div>
   );

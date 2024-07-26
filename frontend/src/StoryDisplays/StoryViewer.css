@@ -1,97 +1,170 @@
 .story-viewer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-  .story-container {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    height: 100%;
-    max-height: 700px;
-    background-color: #000;
-    display: flex;
-    flex-direction: column;
-  }
+.story-container {
+  position: relative;
+  width: 80%;
+  max-width: 350px;
+  height: auto;
+  max-height: 70%;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
 
-  .story-header {
-    padding: 10px;
-    z-index: 10;
-  }
+.story-header {
+  padding: 10px;
+  z-index: 10;
+  width: 100%;
+}
 
-  .progress-container {
-    display: flex;
-    width: 100%;
-    padding: 10px;
-  }
+.progress-container {
+  display: flex;
+  width: 100%;
+  padding: 10px;
+}
 
-  .progress-bar {
-    flex: 1;
-    height: 2px;
-    background-color: rgba(255, 255, 255, 0.3);
-    margin: 0 2px;
-  }
+.progress-bar {
+  flex: 1;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.3);
+  margin: 0 2px;
+}
 
-  .progress-fill {
-    height: 100%;
-    background-color: white;
-    transition: width 0.1s linear;
-  }
+.progress-fill {
+  height: 100%;
+  background-color: white;
+  transition: width 0.1s linear;
+}
 
-  .user-info {
-    display: flex;
-    align-items: center;
-    color: white;
-  }
+.user-info {
+  display: flex;
+  align-items: center;
+  color: white;
+}
 
-  .user-avatar {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 10px;
-  }
+.user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
 
-  .username {
-    font-weight: bold;
-  }
+.username {
+  font-weight: bold;
+}
 
-  .story-image {
-    flex-grow: 1;
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-  }
+.story-image {
+  object-fit: contain;
+  width: 100%;
+  height: auto;
+  max-height: 70%;
+}
 
-  .story-controls {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-  }
+.story-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
 
-  .story-control {
-    flex: 1;
-    height: 100%;
-  }
+.story-control {
+  flex: 1;
+  height: 100%;
+}
 
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
+.menu-button{
+  background-color: black;
+  color: #fff;
+}
+
+.nav-button{
+    background-color: #444;
     border: none;
-    color: white;
+    color: #000;
     font-size: 24px;
+    padding: 10px;
     cursor: pointer;
-    z-index: 20;
-  }
+    pointer-events: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 1px;
+  font-size: 24px;
+  width: 50%;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: #333;
+}
+
+.story-nav-button {
+  background-color: #444;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  padding: 10px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.story-nav-button:hover {
+  background-color: #666;
+  transform: scale(1.1);
+}
+
+.story-nav-button.left {
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
+
+.story-nav-button.right {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+}
+
+.story-nav-buttons {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+/* Spinner styling */
+.spinner {
+  border: 8px solid rgba(255, 255, 255, 0.3);
+  border-top: 8px solid #fff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

@@ -1,37 +1,64 @@
 .friends-page {
-    display: flex;
-  }
+  display: flex;
+}
 
-  .friends-content {
-    flex-grow: 1;
-    padding: 20px;
-    margin-left: 200px; /* To avoid overlapping with the sidebar */
-  }
+.friends-content {
+  flex-grow: 1;
+  padding: 20px;
+  margin-left: 250px; /* Adjust to match the sidebar width */
+  color: #fff;
+}
 
-  .friends-tabs {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
-  }
+.connections-list {
+  display: flex;
+  flex-direction: column;
+}
 
-  .tab {
-    cursor: pointer;
-    padding: 10px;
-    flex-grow: 1;
-    text-align: center;
-    border-bottom: 2px solid transparent;
-  }
+.connection-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
 
-  .tab.active {
-    border-bottom: 2px solid #ff6600;
-  }
+.profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
 
-  .friends-details {
-    padding: 20px;
-  }
+.connection-info {
+  flex-grow: 1;
+}
 
-  .grow-connections-section, .suggested-connections-section {
-    padding: 20px;
-    border: 1px solid #333;
-    margin-bottom: 10px;
-  }
+.connection-name {
+  font-weight: bold;
+  color: #ff6600; /* Change color to orange */
+  text-decoration: none; /* Remove underline */
+}
+
+.connection-role {
+  color: #bbb;
+}
+
+.connection-location {
+  color: #888;
+}
+
+.remove-button {
+  background-color: #ff0000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.remove-button:hover {
+  background-color: #cc0000;
+}

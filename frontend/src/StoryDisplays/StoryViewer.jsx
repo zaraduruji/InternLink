@@ -141,9 +141,9 @@ const StoryViewer = ({ stories, onClose, currentUser, onDeleteStory }) => {
           <div className="story-control left" onClick={handlePrevious}></div>
           <div className="story-control right" onClick={handleNext}></div>
         </div>
-        <div className="user-navigation">
-          <button className="nav-button left" onClick={handlePreviousUser}>&lt;</button>
-          <button className="nav-button right" onClick={handleNextUser}>&gt;</button>
+        <div className="story-nav-buttons">
+          <button className="story-nav-button left" onClick={handlePreviousUser}>&lt;</button>
+          <button className="story-nav-button right" onClick={handleNextUser}>&gt;</button>
         </div>
       </div>
       <button className="close-button" onClick={onClose}>×</button>

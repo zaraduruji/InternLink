@@ -1,215 +1,190 @@
 /* Notifications.css */
 .notifications-modal {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 300px;
-    background-color: var(--bg-color, #fff);
-    color: var(--text-color, #000);
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    overflow-y: auto;
-  }
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  background-color: #000000; /* Match the background color with homepage and sidebar */
+  color: #ffffff; /* Ensure text color is white */
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: auto;
+}
 
-  .notifications-content {
-    padding: 20px;
-  }
+.notifications-content {
+  padding: 20px;
+}
 
-  .notifications-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border-color, #eee);
-    margin-bottom: 20px;
-  }
+.close-buttonn{
+  color: #000;
+  background-color: #000;
+}
 
-  .tab {
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    color: var(--text-color, #000);
-  }
+.notifications-tabs {
+  display: flex;
+  border-bottom: 1px solid #555555; /* Match the border color */
+  margin-bottom: 20px;
+}
 
-  .tab:hover {
-    background-color: rgba(0, 123, 255, 0.1);
-  }
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  color: #ffffff; /* Ensure text color is white */
+}
 
-  .tab.active {
-    border-bottom: 2px solid var(--active-tab-color, #007bff);
-    color: var(--active-tab-color, #007bff);
-  }
+.tab:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
 
-  .notifications-section {
-    margin-bottom: 20px;
-  }
+.tab.active {
+  border-bottom: 2px solid #ff5733; /* Use orange for active tab */
+  color: #ff5733; /* Use orange for active tab */
+}
 
-  .notifications-section h3 {
-    font-size: 14px;
-    color: var(--section-header-color, #888);
-    margin-bottom: 10px;
-  }
+.notifications-section {
+  margin-bottom: 20px;
+}
 
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-color, #000);
-    transition: transform 0.2s ease, color 0.2s ease;
-  }
+.notifications-section h3 {
+  font-size: 14px;
+  color: #888888;
+  margin-bottom: 10px;
+}
 
-  .close-button:hover {
-    transform: scale(1.1);
-    color: var(--active-tab-color, #007bff);
-  }
+.notification {
+  padding: 10px;
+  border-bottom: 1px solid #555555; /* Match the border color */
+  position: relative;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+  color: #ffffff; /* Ensure text color is white */
+}
 
-  .notification {
-    padding: 10px;
-    border-bottom: 1px solid var(--border-color, #eee);
-    position: relative;
-    background-color: var(--notification-bg, transparent);
-    transition: background-color 0.2s ease;
-    color: var(--text-color, #000);
-  }
+.notification:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
 
-  .notification:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-  }
+.read-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #ff5733; /* Use orange for read indicator */
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
 
-  .read-indicator {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 2px solid #007bff;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-  }
+.read-indicator:hover {
+  transform: scale(1.2);
+}
 
-  .read-indicator:hover {
-    transform: scale(1.2);
-  }
+.notification.read .read-indicator {
+  background-color: #ff5733; /* Use orange for read indicator */
+}
 
-  .notification.read .read-indicator {
-    background-color: #007bff;
-  }
+.friend-request-actions {
+  margin-top: 10px;
+}
 
-  .friend-request-actions {
-    margin-top: 10px;
-  }
+.friend-request-actions button {
+  margin-right: 10px;
+  background-color: #ff5733; /* Use orange for buttons */
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
 
-  .friend-request-actions button {
-    margin-right: 10px;
-    background-color: var(--button-bg, #007bff);
-    color: var(--button-text, #fff);
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-  }
+.friend-request-actions button:hover {
+  background-color: #cc4726; /* Darker shade of orange for hover */
+  transform: translateY(-2px);
+}
 
-  .friend-request-actions button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
-  }
+.friend-request-actions button:active {
+  transform: translateY(0);
+}
 
-  .friend-request-actions button:active {
-    transform: translateY(0);
-  }
+.view-button {
+  background-color: #ff5733; /* Use orange for buttons */
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
 
-  .notifications-bell {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 1001;
-    color: var(--icon-color, #000);
-    transition: transform 0.3s ease, color 0.3s ease;
-  }
+.view-button:hover {
+  background-color: #cc4726; /* Darker shade of orange for hover */
+  transform: translateY(-2px);
+}
 
-  .notifications-bell:hover {
-    color: red;
-    transform: scale(1.2);
-  }
+.view-button:active {
+  transform: translateY(0);
+}
 
-  .notifications-bell:active {
-    transform: scale(1.1);
-  }
+.delete-button {
+  background-color: red; /* Use red for delete button */
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
 
-  /* Dark mode styles */
-  .dark-mode .notifications-modal {
-    --bg-color: #333;
-    --text-color: #fff;
-    --border-color: #555;
-    --notification-bg: #444;
-    --button-bg: #007bff;
-    --button-text: #fff;
-    --icon-color: #fff;
-  }
+.delete-button:hover {
+  background-color: darkred; /* Darker shade of red for hover */
+  transform: translateY(-2px);
+}
 
-  .dark-mode .notifications-bell {
-    color: #fff;
-  }
+.delete-button:active {
+  transform: translateY(0);
+}
 
-  .dark-mode .notifications-bell:hover {
-    color: red;
-  }
+.notifications-bell {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1001;
+  color: #ffffff;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
 
-  .dark-mode .tab {
-    color: #fff;
-  }
+.notifications-bell:hover {
+  color: red;
+  transform: scale(1.2);
+}
 
-  .dark-mode .notification {
-    color: #fff;
-  }
+.notifications-bell:active {
+  transform: scale(1.1);
+}
 
-  /* Light mode styles */
-  .light-mode .notifications-modal {
-    --bg-color: #fff;
-    --text-color: #000;
-    --border-color: #eee;
-    --notification-bg: transparent;
-    --button-bg: #007bff;
-    --button-text: #fff;
-    --icon-color: #000;
-  }
+@keyframes bellShake {
+  0% { transform: rotate(0) scale(1.2); }
+  15% { transform: rotate(5deg) scale(1.2); }
+  30% { transform: rotate(-5deg) scale(1.2); }
+  45% { transform: rotate(4deg) scale(1.2); }
+  60% { transform: rotate(-4deg) scale(1.2); }
+  75% { transform: rotate(2deg) scale(1.2); }
+  85% { transform: rotate(-2deg) scale(1.2); }
+  92% { transform: rotate(1deg) scale(1.2); }
+  100% { transform: rotate(0) scale(1.2); }
+}
 
-  .light-mode .notifications-bell:hover {
-    color: red;
-  }
+.notifications-bell.has-new {
+  animation: bellShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
 
-  .light-mode .tab {
-    color: #000;
-  }
-
-  .light-mode .notification {
-    color: #000;
-  }
-
-  /* Optional: Add a shake animation for new notifications */
-  @keyframes bellShake {
-    0% { transform: rotate(0) scale(1.2); }
-    15% { transform: rotate(5deg) scale(1.2); }
-    30% { transform: rotate(-5deg) scale(1.2); }
-    45% { transform: rotate(4deg) scale(1.2); }
-    60% { transform: rotate(-4deg) scale(1.2); }
-    75% { transform: rotate(2deg) scale(1.2); }
-    85% { transform: rotate(-2deg) scale(1.2); }
-    92% { transform: rotate(1deg) scale(1.2); }
-    100% { transform: rotate(0) scale(1.2); }
-  }
-
-  .notifications-bell.has-new {
-    animation: bellShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-  }
-
-  .notifications-bell.has-new:hover {
-    animation: none;
-    transform: scale(1.2);
-    color: red;
-  }
+.notifications-bell.has-new:hover {
+  animation: none;
+  transform: scale(1.2);
+  color: red;
+}

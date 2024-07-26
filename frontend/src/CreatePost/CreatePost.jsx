@@ -1,22 +1,12 @@
-import React, { useState, useContext } from 'react';
-import { usePosts } from '../PostContext';
-import { UserContext } from '../UserContext';
+import React, { useState } from 'react';
+import axios from 'axios';
 import './CreatePost.css';
 
-function CreatePost({ isOpen, onClose }) {
+function CreatePost({ isOpen, onClose, onPostCreated }) {
   const [postContent, setPostContent] = useState('');
   const [image, setImage] = useState(null);
-  const [posts, setPosts] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const addPost = async (newPost) => {
-    try {
-      const response = await axios.post('http://localhost:3000/api/posts', newPost);
-      setPosts(prevPosts => [response.data, ...prevPosts]);
-    } catch (error) {
-      console.error('Error adding post:', error);
-    }
-  };
-  const {user}= JSON.parse(localStorage.getItem('user'))
+  const user = JSON.parse(localStorage.getItem('user'));
 
   const handleContentChange = (e) => setPostContent(e.target.value);
 
@@ -36,13 +26,12 @@ function CreatePost({ isOpen, onClose }) {
     formData.append('content', postContent);
     formData.append('userId', user.id);
     if (image) {
-      console.log('Appending image:', image);
       formData.append('image', image);
     }
 
     try {
-      console.log('FormData content before submission:', Array.from(formData.entries()));
-      await addPost(formData);
+      const response = await axios.post('http://localhost:3000/api/posts', formData);
+      onPostCreated(response.data);
       setPostContent('');
       setImage(null);
       onClose();
@@ -56,20 +45,28 @@ function CreatePost({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className={`modal-overlay ${user.darkMode ? 'dark-mode' : 'light-mode'}`}>
+      <div className={`modal-content ${user.darkMode ? 'dark-mode' : 'light-mode'}`}>
         <button className="close-button" onClick={onClose}>&times;</button>
-        <h2 className="modal-title">Create a Post</h2>
+        <div className="modal-header">
+          <img src={user.profilePicture || '/default-profile-pic.png'} alt="User" className="profile-pic" />
+          <div>
+            <h4 className="user-name">{user.firstName} {user.lastName}</h4>
+            <span className="post-visibility">Post to Anyone</span>
+          </div>
+        </div>
         <form onSubmit={handleSubmit} className="post-form">
           <textarea
             value={postContent}
             onChange={handleContentChange}
-            placeholder="What do you want to talk about?"
+            placeholder="Share your thoughts..."
           />
-          <input type="file" onChange={handleImageUpload} accept="image/*" />
-          <button type="submit" disabled={isSubmitting || !postContent.trim()}>
-            {isSubmitting ? 'Posting...' : 'Post'}
-          </button>
+          <div className="form-actions">
+            <input type="file" onChange={handleImageUpload} accept="image/*" />
+            <button type="submit" disabled={isSubmitting || !postContent.trim()}>
+              {isSubmitting ? 'Posting...' : 'Post'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -24,24 +24,10 @@ const SearchModal = ({ isOpen, onClose, darkMode }) => {
               email: user.email,
               location: user.location,
               jobTitle: user.jobTitle,
-              userProfilePicture: '/default-profile-pic.png'
+              userProfilePicture: user.profilePicture || '/default-profile-pic.png'
             })));
           }
 
-          if (selectedFilter === 'all' || selectedFilter === 'jobs' || selectedFilter === 'companies') {
-            combinedResults.push(...data.jobResults.map(job => ({
-              type: 'job',
-              uploaderName: job.uploaderName,
-              companyName: job.companyName,
-              role: job.role,
-              description: job.description,
-              userProfilePicture: job.userProfilePicture,
-              imageUrl: job.imageUrl,
-              timestamp: job.timestamp,
-              likeCount: job.likeCount,
-              comments: job.comments
-            })));
-          }
           setSearchResults(combinedResults);
         })
         .catch(error => console.error('Error fetching search results:', error));
@@ -90,8 +76,6 @@ const SearchModal = ({ isOpen, onClose, darkMode }) => {
               ) : (
                 <span className="search-result-name">{result.name || result.uploaderName}</span>
               )}
-              {result.role && <span className="search-result-role">{result.role}</span>}
-              {result.companyName && <span className="search-result-company">{result.companyName}</span>}
               {result.jobTitle && <span className="search-result-job-title">{result.jobTitle}</span>}
               {result.location && <span className="search-result-location">{result.location}</span>}
             </div>
