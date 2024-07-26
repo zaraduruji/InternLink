@@ -28,8 +28,6 @@ const Home = ({ openCreatePostModal }) => {
       const response = await fetch(`http://localhost:3000/api/users/${user.id}`);
       const data = await response.json();
       setUser(data);
-      setAbout(data.about || '');
-      setIsLoading(false);
     } catch (error) {
       console.error(error);
     }

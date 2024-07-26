@@ -47,8 +47,6 @@ if (data.success && data.profilePicture) {
   });
 
   const result = await response.json();
-  console.log(result);
-
           updateUser({
             ...result
           });

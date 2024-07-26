@@ -19,11 +19,11 @@ const Profile = () => {
   });
   const fetchUser = async () => {
     try {
+      let user =  JSON.parse(localStorage.getItem('user'))
       const response = await fetch(`http://localhost:3000/api/users/${user.id}`);
       const data = await response.json();
+      console.log(data)
       setUser(data);
-      setAbout(data.about || '');
-      setIsLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -31,7 +31,7 @@ const Profile = () => {
   useEffect(()=>{
 fetchUser()
   }, [])
-
+  console.log(user)
   const updateUser = (newUserData) => {
     setUser((prevUser) => {
       const updatedUser = { ...prevUser, ...newUserData };

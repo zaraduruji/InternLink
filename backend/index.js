@@ -678,6 +678,9 @@ app.get('/api/users/:id', async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: parseInt(id, 10) },
+      include: {
+        education: true
+      }
     });
     if (user) {
       res.json(user);
