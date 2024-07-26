@@ -8,20 +8,20 @@ const CommentModal = ({ post, onTap }) => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = JSON.parse(localStorage.getItem('user')).id
 
-const addComment = async (  content) => {
-  try {
-    const response = await axios.post(`http://localhost:3000/api/posts/${post.id}/comments`, {
-      userId,
-      content
-    });
-    console.log('Comment added:', response.data);
-    onTap()
-    window.location.reload();
-    setComments((prev)=> [...prev, {...user , content: commentText, date: new Date() }])
-  } catch (error) {
-    console.error('Error adding comment:', error);
-  }
-};
+  const addComment = async (content) => {
+    try {
+      const response = await axios.post(`http://localhost:3000/api/posts/${post.id}/comments`, {
+        userId,
+        content
+      });
+      console.log('Comment added:', response.data);
+      onTap()
+      window.location.reload();
+      setComments((prev) => [...prev, { ...user, content: commentText, createdAt: new Date() }]);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
 
   const handleAddComment = (e) => {
     if (e.key === 'Enter' && commentText.trim() !== '') {
@@ -42,14 +42,14 @@ const addComment = async (  content) => {
               {comments.map((comment, index) => (
                 <div key={index} className="comment">
                   <div className="comment-header">
-                  {comment.user && comment.user.profilePicture ? (
+                    {comment.user && comment.user.profilePicture ? (
                       <img
                         src={comment.user.profilePicture}
                         alt={`${comment.user.firstName} ${comment.user.lastName}`}
                         className="comment-profile-pic"
                       />
                     ) : (
-                      <i class="fa-solid fa-user"></i>
+                      <i className="fa-solid fa-user comment-profile-icon"></i>
                     )}
                     <div className="comment-user-info">
                       <span className="comment-user-name">

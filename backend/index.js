@@ -268,16 +268,55 @@ app.post('/login', async (req, res) => {
 });
 
 app.put('/update-profile', async (req, res) => {
+  console.log('Received update profile request:', req.body);
   const { userId, firstName, lastName, location, jobTitle, about, education, profilePicture } = req.body;
 
+  if (!userId) {
+    return res.status(400).json({ error: 'userId is required' });
+  }
+
   try {
+    const parsedUserId = parseInt(userId, 10);
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({ error: 'Invalid userId format' });
+    }
+
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(userId, 10) },
-      data: { firstName, lastName, location, jobTitle, about, education, profilePicture },
+      where: { id: parsedUserId },
+      data: {
+        ...(firstName !== undefined && { firstName }),
+        ...(lastName !== undefined && { lastName }),
+        ...(location !== undefined && { location }),
+        ...(jobTitle !== undefined && { jobTitle }),
+        ...(about !== undefined && { about }),
+        ...(profilePicture !== undefined && { profilePicture }),
+        ...(education !== undefined && {
+          education: {
+            deleteMany: {},
+            create: education.map(edu => ({
+              school: edu.school,
+              degree: edu.degree,
+              startDate: new Date(edu.startDate),
+              endDate: new Date(edu.endDate),
+              grade: edu.grade,
+              logo: edu.logo
+            }))
+          }
+        }),
+      },
+      include: {
+        education: true
+      }
     });
+
     res.status(200).json({ user: updatedUser });
   } catch (error) {
-    res.status(400).json({ error: 'Failed to update profile' });
+    console.error('Error updating profile:', error);
+    if (error.code === 'P2025') {
+      res.status(404).json({ error: 'User not found' });
+    } else {
+      res.status(400).json({ error: 'Failed to update profile', details: error.message });
+    }
   }
 });
 
@@ -348,6 +387,22 @@ app.post('/uploadProfilePicture', upload.single('profilePicture'), async (req, r
     res.status(500).send('Error updating profile picture.');
   }
 });
+app.post('/uploadPicture', async (req, res) => {
+  const userId = req.body.userId;
+  const result = req.body.profilePicture
+  console.log(req.body)
+  try {
+
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(userId, 10) },
+      data: { profilePicture: result },
+    });
+    res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    res.status(500).send('Error updating profile picture.');
+  }
+});
+
 
 app.post('/api/send-friend-request', async (req, res) => {
   const { userId, targetUserId } = req.body;
@@ -892,7 +947,7 @@ app.post('/api/posts/:id/like', async (req, res) => {
 
 const CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
 const CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
-const REDIRECT_URI = 'http://localhost:3000/auth/linkedIn/callback';
+const REDIRECT_URI = 'http://localhost:5173/auth/linkedin/callback';
 
 app.get('/auth/linkedIn/callback', async (req, res) => {
   try {
@@ -927,8 +982,6 @@ app.get('/auth/linkedIn/callback', async (req, res) => {
     //   headers: { Authorization: `Bearer ${accessToken}` }
     // });
 
-    console.log(profileResponse)
-
     const profilePictureUrl = profileResponse.data.picture;
 
     // // Download profile picture
@@ -943,8 +996,20 @@ app.get('/auth/linkedIn/callback', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Detailed error in LinkedIn callback:', error);
     res.status(500).json({ error: 'An error occurred', details: error.message });
+  }
+});
+
+// DELETE a post
+app.delete('/api/posts/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.post.delete({
+      where: { id: parseInt(id, 10) },
+    });
+    res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ error: 'Error deleting post' });
   }
 });
 

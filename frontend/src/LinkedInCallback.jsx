@@ -1,12 +1,27 @@
 // src/components/LinkedInCallback.js
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUser } from './UserContext';
 
 const LinkedInCallback = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { updateUser } = useUser();
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
+    }
+  });
+  const updateUser = (newUserData) => {
+    setUser((prevUser) => {
+      const updatedUser = { ...prevUser, ...newUserData };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
 
   useEffect(() => {
     const fetchLinkedInData = async () => {
@@ -16,13 +31,26 @@ const LinkedInCallback = () => {
 
       try {
         const response = await fetch(`http://localhost:3000/auth/linkedIn/callback?code=${code}&state=${state}`);
-        const data = await response.json();
+const data = await response.json();
 
-        if (data.success) {
-          // Update user profile with LinkedIn data
+if (data.success && data.profilePicture) {
+  console.log(user.id, data);
+  const response = await fetch('http://localhost:3000/uploadPicture', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId: user.id,
+      profilePicture: data.profilePicture
+    }),
+  });
+
+  const result = await response.json();
+  console.log(result);
+
           updateUser({
-            ...data.profile,
-            profilePicture: `data:image/jpeg;base64,${data.profilePicture}`
+            ...result
           });
           navigate('/profile'); // Redirect to profile page
         } else {
@@ -36,7 +64,7 @@ const LinkedInCallback = () => {
     };
 
     fetchLinkedInData();
-  }, [location, navigate, updateUser]);
+  }, []);
 
   return <div>Loading...</div>;
 };

@@ -8,7 +8,24 @@ const years = Array.from(new Array(50), (val, index) => new Date().getFullYear()
 
 const ProfileJobTitle = () => {
   const navigate = useNavigate();
-  const { user, updateUser } = useContext(UserContext);
+  const [user, setUser] = useState(() => {
+    // Initialize user state from localStorage
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
+    }
+  });
+  const updateUser = (newUserData) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, ...newUserData };
+      // Store updated user in localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
   const [jobTitle, setJobTitle] = useState(user ? user.jobTitle : '');
   const [companyName, setCompanyName] = useState(user ? user.companyName : '');
   const [employmentType, setEmploymentType] = useState(user ? user.employmentType : '');

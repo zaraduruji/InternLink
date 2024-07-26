@@ -1,3 +1,4 @@
+/* Common Styles */
 .comment-modal-overlay {
     position: fixed;
     top: 0;
@@ -12,7 +13,6 @@
   }
 
   .comment-modal {
-    background: white;
     border-radius: 8px;
     overflow: hidden;
     width: 80%;
@@ -118,5 +118,75 @@
   }
 
   .add-comment-button:hover {
+    background-color: #0056b3;
+  }
+
+  /* Dark Mode */
+  .dark-mode .comment-modal {
+    background: #181818;
+  }
+
+  .dark-mode .comment-modal-left {
+    background: #121212;
+  }
+
+  .dark-mode .comments-section {
+    color: #e0e0e0;
+  }
+
+  .dark-mode .comment {
+    border-bottom: 1px solid #333;
+  }
+
+  .dark-mode .comment-timestamp {
+    color: #888;
+  }
+
+  .dark-mode .comment-field input {
+    background: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+  }
+
+  .dark-mode .add-comment-button {
+    background-color: #333;
+  }
+
+  .dark-mode .add-comment-button:hover {
+    background-color: #555;
+  }
+
+  /* Light Mode */
+  .light-mode .comment-modal {
+    background: #fff;
+  }
+
+  .light-mode .comment-modal-left {
+    background: #f0f0f0;
+  }
+
+  .light-mode .comments-section {
+    color: #000;
+  }
+
+  .light-mode .comment {
+    border-bottom: 1px solid #ddd;
+  }
+
+  .light-mode .comment-timestamp {
+    color: #666;
+  }
+
+  .light-mode .comment-field input {
+    background: #fff;
+    color: #000;
+    border: 1px solid #ddd;
+  }
+
+  .light-mode .add-comment-button {
+    background-color: #007bff;
+  }
+
+  .light-mode .add-comment-button:hover {
     background-color: #0056b3;
   }

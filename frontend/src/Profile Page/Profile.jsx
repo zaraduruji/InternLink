@@ -9,7 +9,6 @@ import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
 const Profile = () => {
   const [user, setUser] = useState(() => {
-    // Initialize user state from localStorage
     const storedUser = localStorage.getItem('user');
     try {
       return storedUser ? JSON.parse(storedUser) : null;
@@ -18,14 +17,29 @@ const Profile = () => {
       return null;
     }
   });
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/${user.id}`);
+      const data = await response.json();
+      setUser(data);
+      setAbout(data.about || '');
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(()=>{
+fetchUser()
+  }, [])
+
   const updateUser = (newUserData) => {
-    setUser(prevUser => {
+    setUser((prevUser) => {
       const updatedUser = { ...prevUser, ...newUserData };
-      // Store updated user in localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     });
   };
+
   const [activeTab, setActiveTab] = useState('highlights');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [photoModalIsOpen, setPhotoModalIsOpen] = useState(false);
@@ -40,9 +54,7 @@ const Profile = () => {
     startDate: '',
     endDate: '',
     grade: '',
-    logo: ''
   });
-  const [universitySuggestions, setUniversitySuggestions] = useState([]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -55,13 +67,15 @@ const Profile = () => {
       setIsLoading(false);
     }, 3000);
 
-    fetch(`http://localhost:3000/api/users/${user.id}/connections-count`)
-      .then((response) => response.json())
-      .then((data) => setConnectionsCount(data.count))
-      .catch((error) => {
-        console.error('Error fetching connections count:', error);
-        setIsLoading(false);
-      });
+    if (user && user.id) {
+      fetch(`http://localhost:3000/api/users/${user.id}/connections-count`)
+        .then((response) => response.json())
+        .then((data) => setConnectionsCount(data.count))
+        .catch((error) => {
+          console.error('Error fetching connections count:', error);
+          setIsLoading(false);
+        });
+    }
   }, [user]);
 
   const handleTabClick = (tab) => {
@@ -135,7 +149,9 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    refetchConnectionCount();
+    if (user && user.id) {
+      refetchConnectionCount();
+    }
   }, [user]);
 
   const openEducationModal = () => {
@@ -158,32 +174,8 @@ const Profile = () => {
     const { name, value } = event.target;
     setEducationDetails((prevDetails) => ({
       ...prevDetails,
-      [name]: value
+      [name]: value,
     }));
-
-    if (name === 'school') {
-      fetchUniversitySuggestions(value);
-    }
-  };
-
-  const fetchUniversitySuggestions = async (query) => {
-    if (!query) return;
-    const response = await fetch(`https://kgsearch.googleapis.com/v1/entities:search?query=${query}&key=YOUR_API_KEY&limit=10&types=Organization`);
-    const data = await response.json();
-    const suggestions = data.itemListElement.map((item) => ({
-      name: item.result.name,
-      logo: item.result.image?.contentUrl || defaultProfilePic
-    }));
-    setUniversitySuggestions(suggestions);
-  };
-
-  const handleUniversitySelect = (suggestion) => {
-    setEducationDetails((prevDetails) => ({
-      ...prevDetails,
-      school: suggestion.name,
-      logo: suggestion.logo
-    }));
-    setUniversitySuggestions([]);
   };
 
   const handleAboutChange = (event) => {
@@ -216,8 +208,11 @@ const Profile = () => {
       startDate: educationDetails.startDate,
       endDate: educationDetails.endDate,
       grade: educationDetails.grade,
-      logo: educationDetails.logo
     };
+    console.log('Sending education data:', updatedEducation);
+
+    const allEducation = user.education ? [...user.education, updatedEducation] : [updatedEducation];
+
     fetch('http://localhost:3000/update-profile', {
       method: 'PUT',
       headers: {
@@ -225,15 +220,24 @@ const Profile = () => {
       },
       body: JSON.stringify({
         userId: user.id,
-        education: [...(user.education || []), updatedEducation],
+        education: allEducation,
       }),
     })
-      .then((response) => response.json())
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        }
+        return data;
+      })
       .then((data) => {
         updateUser(data.user);
         closeEducationModal();
       })
-      .catch((error) => console.error('Error:', error));
+      .catch((error) => {
+        console.error('Error updating profile:', error);
+        alert(`Failed to update profile: ${error.message}`);
+      });
   };
 
   const toggleDarkMode = () => {
@@ -245,7 +249,7 @@ const Profile = () => {
     try {
       const response = await fetch('http://localhost:3000/logout', {
         method: 'POST',
-        credentials: 'include'
+        credentials: 'include',
       });
       if (response.ok) {
         window.location.href = '/';
@@ -258,15 +262,14 @@ const Profile = () => {
   };
 
   const handleLinkedInSignIn = () => {
-    const clientId = '86xqalggwzcbcl';
-    const state = 'DCEeFWf45A53sdfKef424';
-const redirectUri = encodeURIComponent('http://localhost:3000/auth/linkedIn/callback');
-const scope = encodeURIComponent('profile openid email'); // Adjust scopes as needed
+    const clientId = '862czcy94rlwto';
+    const state = 'X6XDUy0gT7udJOuP';
+    const redirectUri = encodeURIComponent('http://localhost:5173/auth/linkedin/callback');
+    const scope = encodeURIComponent('profile openid email');
 
-const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
+    const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=${scope}`;
 
-window.location.href = authUrl;
-
+    window.location.href = authUrl;
   };
 
   if (isLoading) {
@@ -315,7 +318,6 @@ window.location.href = authUrl;
                 <h3>Education</h3>
                 {user?.education?.map((edu, index) => (
                   <div key={index} className="education-item">
-                    <img src={edu.logo} alt={edu.school} />
                     <div>
                       <h4>{edu.school}</h4>
                       <p>{edu.degree}</p>
@@ -412,16 +414,6 @@ window.location.href = authUrl;
           onChange={handleEducationChange}
           placeholder="School"
         />
-        {universitySuggestions.length > 0 && (
-          <ul className="suggestions-list">
-            {universitySuggestions.map((suggestion, index) => (
-              <li key={index} onClick={() => handleUniversitySelect(suggestion)}>
-                <img src={suggestion.logo} alt={suggestion.name} />
-                <span>{suggestion.name}</span>
-              </li>
-            ))}
-          </ul>
-        )}
         <input
           type="text"
           name="degree"
