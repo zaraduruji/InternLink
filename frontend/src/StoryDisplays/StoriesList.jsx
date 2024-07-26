@@ -81,7 +81,6 @@ class StoriesList {
     return result;
   }
 
-  // New methods
 
   addStory(story) {
     this.insertStory(story);

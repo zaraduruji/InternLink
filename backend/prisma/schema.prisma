@@ -25,7 +25,10 @@ model User {
   experience               Experience[]
   skills                   Skill[]
   notifications            Notification[]
+  posts                    Post[]
+  comments                 Comment[]
   profilePicture           String?
+   likes                   Like[]
   connections              Connection[]    @relation("UserConnections")
   friendConnections        Connection[]    @relation("UserFriendConnections")
   userFriendRequests       FriendRequest[] @relation("Requesters")
@@ -73,6 +76,8 @@ model Notification {
   user            User          @relation(fields: [userId], references: [id])
   friendRequestId Int?
   friendRequest   FriendRequest? @relation(fields: [friendRequestId], references: [id])
+  storyId         Int?          // New field
+  story           Story?        @relation(fields: [storyId], references: [id]) // New relation
 }
 
 
@@ -95,32 +100,47 @@ model FriendRequest {
   notifications Notification[]
 }
 
-model JobListing {
-  id                 Int       @id @default(autoincrement())
-  role               String
-  userProfilePicture String
-  imageUrl           String?
-  description        String
-  timestamp          DateTime  @default(now())
-  companyName        String
-  uploaderName       String
-  likeCount          Int?      @default(0)
-  comments           Comment[]
-}
-
 model Comment {
-  id           Int        @id @default(autoincrement())
-  content      String
-  timestamp    DateTime   @default(now())
-  jobListing   JobListing @relation(fields: [jobListingId], references: [id])
-  jobListingId Int
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  postId    Int
+  post      Post     @relation(fields: [postId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Story {
+  id            Int           @id @default(autoincrement())
+  userId        Int
+  fileUrl       String
+  createdAt     DateTime      @default(now())
+  expiresAt     DateTime
+  user          User          @relation("userStory", fields: [userId], references: [id])
+  notifications Notification[]
+}
+
+model Post {
   id        Int      @id @default(autoincrement())
-  userId    Int
-  fileUrl   String
+  content   String
+  imageUrl  String?
   createdAt DateTime @default(now())
-  expiresAt DateTime
-  user      User     @relation("userStory", fields: [userId], references: [id])
+  updatedAt DateTime @updatedAt
+  likeCount Int      @default(0)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  comments  Comment[]
+  likes     Like[]
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+
+  @@unique([postId, userId])
 }

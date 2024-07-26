@@ -8,6 +8,7 @@ import SequelizeStoreInit from 'connect-session-sequelize';
 import fs from 'fs';
 import path from 'path';
 import multer from 'multer';
+import qs from 'qs';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from 'cloudinary';
@@ -15,6 +16,8 @@ import { ApolloServer } from 'apollo-server-express';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { addHours } from 'date-fns';
+import axios from 'axios';
+import suggestedConnectionsRoute from './suggestedConnections.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -69,20 +72,19 @@ app.use(
 
 sessionStore.sync();
 
-// Load GraphQL schema
+
 const typeDefs = fs.readFileSync(
   path.join(__dirname, 'schema.graphql'),
   'utf8'
 );
 
-// Define resolvers
 const resolvers = {
   Query: {
     getNotifications: async (_, { userId }) => {
       return prisma.notification.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
-        include: { friendRequest: true },
+        include: { friendRequest: true, story: true },
       });
     },
   },
@@ -92,7 +94,6 @@ const resolvers = {
         where: { id: requesterId },
         select: { firstName: true, lastName: true }
       });
-
       const friendRequest = await prisma.friendRequest.create({
         data: {
           requesterId,
@@ -107,7 +108,6 @@ const resolvers = {
           }
         },
       });
-
       return friendRequest;
     },
     acceptFriendRequest: async (_, { requestId }) => {
@@ -115,16 +115,13 @@ const resolvers = {
         where: { id: requestId },
         include: { requester: true, recipient: true }
       });
-
       if (!friendRequest) {
         throw new Error('Friend request not found');
       }
-
       await prisma.friendRequest.update({
         where: { id: requestId },
         data: { status: 'ACCEPTED' },
       });
-
       await prisma.connection.create({
         data: {
           userId: friendRequest.requesterId,
@@ -132,7 +129,6 @@ const resolvers = {
           status: 'CONNECTED',
         },
       });
-
       // Create notification for the requester
       await prisma.notification.create({
         data: {
@@ -142,7 +138,6 @@ const resolvers = {
           isRead: false,
         },
       });
-
       // Update connection count for both users
       await prisma.user.update({
         where: { id: friendRequest.requesterId },
@@ -152,7 +147,6 @@ const resolvers = {
         where: { id: friendRequest.recipientId },
         data: { connectionCount: { increment: 1 } }
       });
-
       return friendRequest;
     },
     declineFriendRequest: async (_, { requestId }) => {
@@ -167,13 +161,69 @@ const resolvers = {
         data: { isRead: true },
       });
     },
+    createStoryNotification: async (_, { userId, storyId }) => {
+      const story = await prisma.story.findUnique({
+        where: { id: storyId },
+        include: { user: true },
+      });
+      if (!story) {
+        throw new Error('Story not found');
+      }
+
+      const connections = await prisma.connection.findMany({
+        where: {
+          OR: [
+            { userId: story.userId },
+            { friendId: story.userId }
+          ],
+          status: 'CONNECTED'
+        },
+      });
+
+      const notifications = await Promise.all(
+        connections.map(async (connection) => {
+          const recipientId = connection.userId === story.userId ? connection.friendId : connection.userId;
+          return prisma.notification.create({
+            data: {
+              userId: recipientId,
+              type: 'STORY_UPLOAD',
+              content: `${story.user.firstName} ${story.user.lastName} uploaded a new story`,
+              isRead: false,
+              storyId: story.id,
+            },
+          });
+        })
+      );
+
+      return notifications[0];
+    },
+    deleteNotification: async (_, { notificationId }) => {
+      try {
+        const notification = await prisma.notification.findUnique({
+          where: { id: notificationId },
+        });
+
+        if (!notification) {
+          throw new Error('Notification not found');
+        }
+
+        await prisma.notification.delete({
+          where: { id: notificationId },
+        });
+
+        return true;
+      } catch (error) {
+        console.error('Error deleting notification:', error);
+        return false;
+      }
+    },
   },
 };
 
-// Create Apollo Server
+
 const server = new ApolloServer({ typeDefs, resolvers });
 
-// Existing routes
+
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
@@ -219,29 +269,79 @@ app.post('/login', async (req, res) => {
 });
 
 app.put('/update-profile', async (req, res) => {
-  const { userId, firstName, lastName, location, jobTitle, about, education, profilePicture } = req.body;
+  console.log('Received update profile request:', req.body);
+  const { userId, firstName, lastName, location, jobTitle, about, education, profilePicture, experience, skills } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'userId is required' });
+  }
 
   try {
+    const parsedUserId = parseInt(userId, 10);
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({ error: 'Invalid userId format' });
+    }
+
     const updatedUser = await prisma.user.update({
-      where: { id: parseInt(userId, 10) },
-      data: { firstName, lastName, location, jobTitle, about, education, profilePicture },
+      where: { id: parsedUserId },
+      data: {
+        ...(firstName !== undefined && { firstName }),
+        ...(lastName !== undefined && { lastName }),
+        ...(location !== undefined && { location }),
+        ...(jobTitle !== undefined && { jobTitle }),
+        ...(about !== undefined && { about }),
+        ...(profilePicture !== undefined && { profilePicture }),
+        ...(education !== undefined && {
+          education: {
+            deleteMany: {},
+            create: education.map(edu => ({
+              school: edu.school,
+              degree: edu.degree,
+              startDate: new Date(edu.startDate),
+              endDate: new Date(edu.endDate),
+              grade: edu.grade,
+              logo: edu.logo
+            }))
+          }
+        }),
+        ...(experience !== undefined && {
+          experience: {
+            deleteMany: {},
+            create: experience.map(exp => ({
+              company: exp.company,
+              position: exp.position,
+              startDate: new Date(exp.startDate),
+              endDate: new Date(exp.endDate)
+            }))
+          }
+        }),
+        ...(skills !== undefined && {
+          skills: {
+            deleteMany: {},
+            create: skills.map(skill => ({
+              name: skill.name
+            }))
+          }
+        })
+      },
+      include: {
+        education: true,
+        experience: true,
+        skills: true
+      }
     });
+
     res.status(200).json({ user: updatedUser });
   } catch (error) {
-    res.status(400).json({ error: 'Failed to update profile' });
+    console.error('Error updating profile:', error);
+    if (error.code === 'P2025') {
+      res.status(404).json({ error: 'User not found' });
+    } else {
+      res.status(400).json({ error: 'Failed to update profile', details: error.message });
+    }
   }
 });
 
-app.get('/api/job-listings', (req, res) => {
-  const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
-  fs.readFile(jsonFilePath, 'utf8', (err, data) => {
-    if (err) {
-      res.status(500).send('Error reading JSON file');
-      return;
-    }
-    res.json(JSON.parse(data));
-  });
-});
 
 app.get('/api/search', async (req, res) => {
   const query = req.query.q ? req.query.q.toLowerCase() : '';
@@ -299,11 +399,27 @@ app.post('/uploadProfilePicture', upload.single('profilePicture'), async (req, r
     res.status(500).send('Error updating profile picture.');
   }
 });
+app.post('/uploadPicture', async (req, res) => {
+  const userId = req.body.userId;
+  const result = req.body.profilePicture
+  console.log(req.body)
+  try {
+
+    const updatedUser = await prisma.user.update({
+      where: { id: parseInt(userId, 10) },
+      data: { profilePicture: result },
+    });
+    res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    res.status(500).send('Error updating profile picture.');
+  }
+});
+
 
 app.post('/api/send-friend-request', async (req, res) => {
   const { userId, targetUserId } = req.body;
   try {
-    // Check if users are already connected
+
     const existingConnection = await prisma.connection.findFirst({
       where: {
         OR: [
@@ -325,7 +441,7 @@ app.post('/api/send-friend-request', async (req, res) => {
       return res.status(400).json({ message: 'You are already connected with this user' });
     }
 
-    // Check if a friend request already exists
+
     const existingFriendRequest = await prisma.friendRequest.findFirst({
       where: {
         OR: [
@@ -345,7 +461,7 @@ app.post('/api/send-friend-request', async (req, res) => {
       return res.status(400).json({ message: 'A friend request is already pending with this user' });
     }
 
-    // Create new friend request
+
     const friendRequest = await prisma.friendRequest.create({
       data: {
         requesterId: parseInt(userId, 10),
@@ -354,20 +470,20 @@ app.post('/api/send-friend-request', async (req, res) => {
       },
     });
 
-    // Fetch the requester's name
+
     const requester = await prisma.user.findUnique({
       where: { id: parseInt(userId, 10) },
       select: { firstName: true, lastName: true }
     });
 
-    // Create a notification for the recipient
+
     await prisma.notification.create({
       data: {
         userId: parseInt(targetUserId, 10),
         type: 'FRIEND_REQUEST',
         content: `You have a new friend request from ${requester.firstName} ${requester.lastName}`,
         createdAt: new Date(),
-        friendRequestId: friendRequest.id // Store the friend request ID
+        friendRequestId: friendRequest.id
       },
     });
 
@@ -394,7 +510,7 @@ app.get('/api/connections/:userId', async (req, res) => {
       },
     });
 
-    // Format the response to return the relevant user data
+
     const formattedConnections = connections.map((connection) => {
       const isRequester = connection.userId === parseInt(userId, 10);
       return {
@@ -457,12 +573,42 @@ app.post('/api/stories', upload.single('story'), async (req, res) => {
       data: {
         userId: parseInt(userId, 10),
         fileUrl: result.secure_url,
-        expiresAt: addHours(new Date(), 24), // Set expiration to 24 hours from now
+        expiresAt: addHours(new Date(), 24),
       },
     });
 
+
+    const user = await prisma.user.findUnique({
+      where: { id: parseInt(userId, 10) },
+      select: { firstName: true, lastName: true },
+    });
+
+    const connections = await prisma.connection.findMany({
+      where: {
+        OR: [
+          { userId: parseInt(userId, 10) },
+          { friendId: parseInt(userId, 10) },
+        ],
+        status: 'CONNECTED',
+      },
+    });
+
+    for (const connection of connections) {
+      const recipientId = connection.userId === parseInt(userId, 10) ? connection.friendId : connection.userId;
+      await prisma.notification.create({
+        data: {
+          userId: recipientId,
+          type: 'STORY_UPLOAD',
+          content: `${user.firstName} ${user.lastName} uploaded a new story`,
+          isRead: false,
+          storyId: story.id,
+        },
+      });
+    }
+
     res.status(200).json({ message: 'Story uploaded successfully!', story });
   } catch (error) {
+    console.error('Error uploading story:', error);
     res.status(500).send('Error uploading story.');
   }
 });
@@ -472,7 +618,7 @@ app.get('/api/stories', async (req, res) => {
     const stories = await prisma.story.findMany({
       where: {
         expiresAt: {
-          gte: new Date(), // Only fetch stories that haven't expired
+          gte: new Date(),
         },
       },
       include: {
@@ -490,7 +636,7 @@ app.get('/api/stories', async (req, res) => {
       },
     });
 
-    // Group stories by user
+
     const groupedStories = stories.reduce((acc, story) => {
       if (!acc[story.userId]) {
         acc[story.userId] = {
@@ -528,7 +674,7 @@ app.delete('/api/stories/expired', async (req, res) => {
     const expiredStories = await prisma.story.deleteMany({
       where: {
         expiresAt: {
-          lt: new Date(), // Delete stories where expiresAt is less than current time
+          lt: new Date(),
         },
       },
     });
@@ -543,7 +689,12 @@ app.get('/api/users/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(id, 10) },
+      where: { id: parseInt(id) },
+      include: {
+        education: true,
+        experience: true,
+        skills: true,
+      }
     });
     if (user) {
       res.json(user);
@@ -582,6 +733,120 @@ app.post('/logout', (req, res) => {
   });
 });
 
+// GET all posts
+app.get('/api/posts', async (req, res) => {
+  try {
+    const posts = await prisma.post.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profilePicture: true,
+          },
+        },
+        likes: {
+          select: {
+            userId: true
+          }
+        },
+        comments: {
+          include: {
+          user: true
+        }
+      }
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching posts' });
+  }
+});
+
+
+app.post('/api/posts', upload.single('image'), async (req, res) => {
+  console.log('Received post request:', req.body);
+  console.log('File:', req.file);
+
+  const { content, userId } = req.body;
+
+  if (!content || !userId) {
+    return res.status(400).json({ error: 'Content and userId are required' });
+  }
+
+  try {
+    let imageUrl = null;
+    if (req.file) {
+      console.log('Attempting to upload file to Cloudinary');
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { resource_type: 'auto' },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              reject(error);
+            } else {
+              console.log('Cloudinary upload successful:', result);
+              resolve(result);
+            }
+          }
+        );
+        uploadStream.end(req.file.buffer);
+      });
+      imageUrl = result.secure_url;
+    }
+
+    console.log('Creating new post with imageUrl:', imageUrl);
+    const newPost = await prisma.post.create({
+      data: {
+        content,
+        imageUrl,
+        userId: parseInt(userId, 10),
+        likeCount: 0,
+      },
+    });
+
+    console.log('Created new post:', newPost);
+    res.status(201).json(newPost);
+  } catch (error) {
+    console.error('Error creating post:', error);
+    res.status(400).json({ error: 'Error creating post', details: error.message });
+  }
+});
+
+
+
+app.delete('/api/posts/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.post.delete({
+      where: { id: parseInt(id, 10) },
+    });
+    res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ error: 'Error deleting post' });
+  }
+});
+
+
+app.put('/api/posts/:id', async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+  try {
+    const updatedPost = await prisma.post.update({
+      where: { id: parseInt(id, 10) },
+      data: { content },
+    });
+    res.json(updatedPost);
+  } catch (error) {
+    res.status(400).json({ error: 'Error updating post' });
+  }
+});
+
 async function startServer() {
   await server.start();
   server.applyMiddleware({ app });
@@ -591,5 +856,171 @@ async function startServer() {
     console.log(`GraphQL endpoint: http://localhost:${port}${server.graphqlPath}`);
   });
 }
+app.post('/api/posts/:id/comments', async (req, res) => {
+  const { id } = req.params;
+  const { userId, content } = req.body;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    const newComment = await prisma.comment.create({
+      data: {
+        content: content,
+        userId: parseInt(userId),
+        postId: parseInt(id)
+      }
+    });
+
+    res.status(201).json(newComment);
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    res.status(500).json({ error: 'Error adding comment' });
+  }
+});
+app.get('/api/posts/:id/comments', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        comments: {
+          include: {
+            user: true
+          }
+        }
+      }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    res.json(post.comments);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    res.status(500).json({ error: 'Error fetching comments' });
+  }
+});
+
+app.post('/api/posts/:id/like', async (req, res) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(id) },
+      include: { likes: true }
+    });
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    const existingLike = post.likes.find(like => like.userId === parseInt(userId));
+
+    if (existingLike) {
+
+      await prisma.like.delete({
+        where: { id: existingLike.id }
+      });
+      post.likeCount -= 1;
+    } else {
+
+      await prisma.like.create({
+        data: {
+          userId: parseInt(userId),
+          postId: parseInt(id)
+        }
+      });
+      post.likeCount += 1;
+    }
+
+
+    const updatedPost = await prisma.post.update({
+      where: { id: parseInt(id) },
+      data: { likeCount: post.likeCount },
+      include: {
+        likes: {
+          select: {
+            userId: true
+          }
+        }
+      }
+    });
+    console.log(updatedPost)
+    res.json(updatedPost);
+
+  } catch (error) {
+    console.error('Error liking/unliking post:', error);
+    res.status(500).json({ error: 'Error liking/unliking post' });
+  }
+});
+
+const CLIENT_ID = process.env.LINKEDIN_CLIENT_ID;
+const CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET;
+const REDIRECT_URI = 'http://localhost:5173/auth/linkedin/callback';
+
+app.get('/auth/linkedIn/callback', async (req, res) => {
+  try {
+    const { code, state } = req.query;
+
+    if (!code || !state) {
+      throw new Error('Missing code or state in query parameters');
+    }
+
+
+    const tokenResponse = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', qs.stringify({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: REDIRECT_URI,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET
+    }), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    const accessToken = tokenResponse.data.access_token;
+
+
+    const profileResponse = await axios.get('https://api.linkedin.com/v2/userinfo', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+
+    const profilePictureUrl = profileResponse.data.picture;
+
+    res.json({
+      success: true,
+      profile: profileResponse.data,
+      profilePicture: profilePictureUrl
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred', details: error.message });
+  }
+});
+
+
+app.delete('/api/posts/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await prisma.post.delete({
+      where: { id: parseInt(id, 10) },
+    });
+    res.status(204).send();
+  } catch (error) {
+    res.status(400).json({ error: 'Error deleting post' });
+  }
+});
+
+app.use('/api', suggestedConnectionsRoute);
+
 
 startServer();

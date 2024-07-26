@@ -1,5 +1,3 @@
-// src/ProfileSetup/ProfileLocation.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
@@ -7,7 +5,15 @@ import './ProfileSetup.css';
 
 const ProfileLocation = () => {
   const navigate = useNavigate();
-  const { user, updateUser } = useContext(UserContext);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
+    }
+  });
   const [location, setLocation] = useState(user ? user.location : '');
   const [error, setError] = useState("");
 
@@ -21,7 +27,13 @@ const ProfileLocation = () => {
       });
     }
   }, []);
-
+  const updateUser = (newUserData) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, ...newUserData };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
   const handleSaveLocation = async (event) => {
     event.preventDefault();
 

@@ -1,0 +1,190 @@
+/* Notifications.css */
+.notifications-modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  background-color: #000000; /* Match the background color with homepage and sidebar */
+  color: #ffffff;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.notifications-content {
+  padding: 20px;
+}
+
+.close-buttonn{
+  color: #000;
+  background-color: #000;
+}
+
+.notifications-tabs {
+  display: flex;
+  border-bottom: 1px solid #555555;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  color: #ffffff;
+}
+
+.tab:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.tab.active {
+  border-bottom: 2px solid #ff5733;
+  color: #ff5733;
+}
+
+.notifications-section {
+  margin-bottom: 20px;
+}
+
+.notifications-section h3 {
+  font-size: 14px;
+  color: #888888;
+  margin-bottom: 10px;
+}
+
+.notification {
+  padding: 10px;
+  border-bottom: 1px solid #555555;
+  position: relative;
+  background-color: transparent;
+  transition: background-color 0.2s ease;
+  color: #ffffff;
+}
+
+.notification:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+.read-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #ff5733;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.read-indicator:hover {
+  transform: scale(1.2);
+}
+
+.notification.read .read-indicator {
+  background-color: #ff5733;
+}
+
+.friend-request-actions {
+  margin-top: 10px;
+}
+
+.friend-request-actions button {
+  margin-right: 10px;
+  background-color: #ff5733;
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.friend-request-actions button:hover {
+  background-color: #cc4726;
+  transform: translateY(-2px);
+}
+
+.friend-request-actions button:active {
+  transform: translateY(0);
+}
+
+.view-button {
+  background-color: #ff5733;
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.view-button:hover {
+  background-color: #cc4726;
+  transform: translateY(-2px);
+}
+
+.view-button:active {
+  transform: translateY(0);
+}
+
+.delete-button {
+  background-color: red;
+  color: #ffffff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.delete-button:hover {
+  background-color: darkred;
+  transform: translateY(-2px);
+}
+
+.delete-button:active {
+  transform: translateY(0);
+}
+
+.notifications-bell {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1001;
+  color: #ffffff;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.notifications-bell:hover {
+  color: red;
+  transform: scale(1.2);
+}
+
+.notifications-bell:active {
+  transform: scale(1.1);
+}
+
+@keyframes bellShake {
+  0% { transform: rotate(0) scale(1.2); }
+  15% { transform: rotate(5deg) scale(1.2); }
+  30% { transform: rotate(-5deg) scale(1.2); }
+  45% { transform: rotate(4deg) scale(1.2); }
+  60% { transform: rotate(-4deg) scale(1.2); }
+  75% { transform: rotate(2deg) scale(1.2); }
+  85% { transform: rotate(-2deg) scale(1.2); }
+  92% { transform: rotate(1deg) scale(1.2); }
+  100% { transform: rotate(0) scale(1.2); }
+}
+
+.notifications-bell.has-new {
+  animation: bellShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.notifications-bell.has-new:hover {
+  animation: none;
+  transform: scale(1.2);
+  color: red;
+}

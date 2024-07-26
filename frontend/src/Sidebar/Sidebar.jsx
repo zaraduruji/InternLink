@@ -5,12 +5,11 @@ import { faHome, faSearch, faUserFriends, faBell, faPlusSquare, faUser, faEllips
 import './Sidebar.css';
 import logo from '/logo.png';
 import SearchModal from '../SearchModal/SearchModal';
-import { UserContext } from '../UserContext';
 
-const Sidebar = ({ toggleDarkMode, darkMode }) => {
+
+const Sidebar = ({ toggleDarkMode, darkMode, openCreatePostModal }) => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const { user } = useContext(UserContext);
 
   const toggleMore = () => {
     setIsMoreOpen(!isMoreOpen);
@@ -36,14 +35,10 @@ const Sidebar = ({ toggleDarkMode, darkMode }) => {
             <FontAwesomeIcon icon={faUserFriends} className="nav-icon" />
             <span className="nav-text">Friends</span>
           </Link>
-          <Link to="/notifications" className="nav-item">
-            <FontAwesomeIcon icon={faBell} className="nav-icon" />
-            <span className="nav-text">Notifications</span>
-          </Link>
-          <Link to="/create-post" className="nav-item">
+          <div className="nav-item" onClick={openCreatePostModal}>
             <FontAwesomeIcon icon={faPlusSquare} className="nav-icon" />
             <span className="nav-text">Create Post</span>
-          </Link>
+          </div>
           <Link to={`/profile`} className="nav-item">
             <FontAwesomeIcon icon={faUser} className="nav-icon" />
             <span className="nav-text">Profile</span>

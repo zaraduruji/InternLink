@@ -3,7 +3,6 @@
 import "./Login.css";
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../UserContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
@@ -13,7 +12,6 @@ function Login({ setShowLoginModal, setShowSignupModal }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -39,7 +37,7 @@ function Login({ setShowLoginModal, setShowSignupModal }) {
       if (response.ok) {
         const data = await response.json();
         const loggedInUser = data.user;
-        updateUser(loggedInUser);
+        localStorage.setItem('user', JSON.stringify(loggedInUser));
         navigate("/home");
       } else {
         setError("Login failed");

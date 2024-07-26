@@ -1,0 +1,149 @@
+.post {
+  background-color: #000;
+  margin: 10px 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #333;
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.post-profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+}
+
+
+.post-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.post-user-name {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.post-company-name {
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+.post-timestamp {
+  font-size: 0.8em;
+  color: #aaa;
+}
+
+.post-description {
+  margin: 10px 0;
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.post-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-action-icon {
+  margin-right: 5px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.like-button, .comment-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.post-action-icon.liked {
+  color: red;
+}
+
+.post-comments {
+  margin-top: 10px;
+}
+
+.comment {
+  font-size: 0.9em;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+.comment-timestamp {
+  font-size: 0.8em;
+  color: #aaa;
+}
+
+.post-menu {
+  margin-left: auto;
+  position: relative;
+}
+
+.post-menu-icon {
+  cursor: pointer;
+}
+
+.post-menu-dropdown {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  background: #333;
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.post-menu-item {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.post-menu-item:hover {
+  background: #444;
+}
+
+.dark-mode .post-action-icon {
+  color: #fff;
+}
+
+.light-mode .post-action-icon {
+  color: #000;
+}
+
+
+.dark-mode .post-action-icon.liked {
+  color: red;
+}
+
+.light-mode .post-action-icon.liked {
+  color: red;
+}

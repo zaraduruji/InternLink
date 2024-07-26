@@ -14,10 +14,9 @@ const Welcome = () => {
   const [fadeInButtons, setFadeInButtons] = useState(false);
 
   useEffect(() => {
-    const welcomeTextTimer = setTimeout(() => setFadeInWelcomeText(true), 300); // Reduced delay
-    const catchPhraseTimer = setTimeout(() => setFadeInCatchPhrase(true), 1000); // Reduced delay
-    const buttonsTimer = setTimeout(() => setFadeInButtons(true), 1700); // Reduced delay
-
+    const welcomeTextTimer = setTimeout(() => setFadeInWelcomeText(true), 300);
+    const catchPhraseTimer = setTimeout(() => setFadeInCatchPhrase(true), 1000);
+    const buttonsTimer = setTimeout(() => setFadeInButtons(true), 1700);
     return () => {
       clearTimeout(welcomeTextTimer);
       clearTimeout(catchPhraseTimer);

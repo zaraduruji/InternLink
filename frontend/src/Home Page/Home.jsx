@@ -1,77 +1,119 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThumbsUp, faComment } from '@fortawesome/free-solid-svg-icons';
+import { faBell } from '@fortawesome/free-solid-svg-icons';
 import Stories from '../StoryDisplays/Stories';
-import { UserContext } from '../UserContext';
 import Sidebar from '../Sidebar/Sidebar';
+import Notifications from '../Notifications Page/Notifications';
+import Post from '../Post/Post';
+import axios from 'axios';
+import CommentModal from '../CommentModal/CommentModal';
+import CreatePost from '../CreatePost/CreatePost';
+import SuggestedConnections from '../SuggestedConnections/SuggestedConnections';
 
-const Home = () => {
+const Home = ({ openCreatePostModal }) => {
   const [darkMode, setDarkMode] = useState(true);
-  const [jobListings, setJobListings] = useState([]);
-  const { user } = useContext(UserContext);
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    try {
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage', error);
+      return null;
+    }
+  });
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/users/${user.id}`);
+      const data = await response.json();
+      setUser(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const [posts, setPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3000/api/posts');
+      setPosts(response.data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handleCreatePost = (newPost) => {
+    setPosts([newPost, ...posts]);
+  };
+
+  const handleCommentAdded = (newComment) => {
+    setPosts(posts.map(post =>
+      post.id === newComment.postId
+      ? { ...post, comments: [...post.comments, newComment] }
+      : post
+    ));
+  };
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.body.classList.toggle('light-mode');
   };
 
-  useEffect(() => {
-    fetch('http://localhost:3000/api/job-listings')
-      .then(response => response.json())
-      .then(data => setJobListings(data))
-      .catch(error => console.error('Error fetching job listings:', error));
-  }, []);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   return (
     <div className={`home-container ${darkMode ? 'dark-mode' : 'light-mode'}`}>
-      <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+      <Sidebar
+        toggleDarkMode={toggleDarkMode}
+        darkMode={darkMode}
+        openCreatePostModal={() => setIsCreatePostModalOpen(true)}
+      />
+      <CreatePost
+        isOpen={isCreatePostModalOpen}
+        onClose={() => setIsCreatePostModalOpen(false)}
+        onPostCreated={handleCreatePost}
+      />
+      {selectedPost && (
+        <CommentModal
+          onClose={() => setSelectedPost(null)}
+          post={selectedPost}
+          onCommentAdded={handleCommentAdded}
+        />
+      )}
       <main className="main-content">
-        <div className="stories-lineup">
-          <Stories currentUser={user} /> {/* Pass the current user to Stories component */}
+        <div className="notifications-bell" onClick={() => setShowNotifications(!showNotifications)}>
+          <FontAwesomeIcon icon={faBell} />
         </div>
-          <div className="posts-container">
-            {jobListings.map((job, index) => (
-              <div key={index} className="post">
-              <div key={index} className="post">
-                <div className="post-header">
-                  <img src={job.userProfilePicture} alt={job.uploaderName} className="post-profile-pic" />
-                  <div className="post-info">
-                    <span className="post-user-name">{job.uploaderName}</span>
-                    <span className="post-company-name">{job.companyName}</span>
-                    <span className="post-timestamp">{new Date(job.timestamp).toLocaleString()}</span>
-                  </div>
-                </div>
-                <div className="post-description">{job.description}</div>
-                {job.imageUrl && <img src={job.imageUrl} alt="Job" className="post-image" />}
-                <div className="post-footer">
-                  <div className="post-actions">
-                    <FontAwesomeIcon icon={faThumbsUp} className="post-action-icon" />
-                    <span>{job.likeCount}</span>
-                    <FontAwesomeIcon icon={faComment} className="post-action-icon" />
-                  </div>
-                  <div className="post-comments">
-                    {job.comments.map((comment, index) => (
-                      <div key={index} className="comment">
-                        <span className="comment-content">{comment.content}</span>
-                        <span className="comment-timestamp">{new Date(comment.timestamp).toLocaleString()}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-            </div>
-            </div>
-          ))}
+        {showNotifications && (
+          <Notifications onClose={() => setShowNotifications(false)} />
+        )}
+        <div className="stories-lineup">
+          <Stories currentUser={user} />
+        </div>
+        <div className="posts-container">
+          {posts.length === 0 ? (
+            <p>No posts available.</p>
+          ) : (
+            posts.map((post) => (
+              <Post key={post.id} post={post} onShow={setSelectedPost} currentUser={user} />
+            ))
+          )}
         </div>
       </main>
-      <aside className="suggested-connections">
-        <h2>Suggested Connections</h2>
-        <div className="connection">Connection 1</div>
-        <div className="connection">Connection 2</div>
-        <div className="connection">Connection 3</div>
-        <div className="connection">Connection 4</div>
-      </aside>
+      <SuggestedConnections />
     </div>
   );
 };
