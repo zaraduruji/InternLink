@@ -1,0 +1,48 @@
+.suggested-connections {
+    padding: 1rem;
+    background-color: #000000; /* Pitch-black background */
+    color: white;
+    margin-top: 20px;
+  }
+
+  .suggested-connections h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: white;
+  }
+
+  .connection {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .profile-pic {
+    border-radius: 50%;
+    margin-right: 1rem;
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+  }
+
+  .connection-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .name {
+    margin: 0;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+  }
+
+  .name:hover {
+    color: orange; /* Orange color on hover */
+    text-decoration: none;
+  }
+
+  .job-title {
+    margin: 0;
+    color: #bbb; /* Light gray color for job title */
+  }

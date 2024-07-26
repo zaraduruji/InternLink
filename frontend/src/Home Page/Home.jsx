@@ -10,6 +10,7 @@ import Post from '../Post/Post';
 import axios from 'axios';
 import CommentModal from '../CommentModal/CommentModal';
 import CreatePost from '../CreatePost/CreatePost';
+import SuggestedConnections from '../SuggestedConnections/SuggestedConnections';
 
 const Home = ({ openCreatePostModal }) => {
   const [darkMode, setDarkMode] = useState(true);
@@ -112,13 +113,7 @@ const Home = ({ openCreatePostModal }) => {
           )}
         </div>
       </main>
-      <aside className="suggested-connections">
-        <h2>Suggested Connections</h2>
-        <div className="connection">Connection 1</div>
-        <div className="connection">Connection 2</div>
-        <div className="connection">Connection 3</div>
-        <div className="connection">Connection 4</div>
-      </aside>
+      <SuggestedConnections />
     </div>
   );
 };

@@ -19,6 +19,9 @@ const ProfileView = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // State for hover effect
+  const [isHovered, setIsHovered] = useState(false);
+
   const fetchUser = async () => {
     try {
       const response = await fetch(`http://localhost:3000/api/users/${id}`);
@@ -122,6 +125,14 @@ const ProfileView = () => {
     }
   };
 
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   if (isLoading) {
     return <LoadingScreen />;
   }
@@ -141,7 +152,14 @@ const ProfileView = () => {
             <p>{user?.location || 'Seattle, WA, USA'}</p>
             <p>{connectionCount} Connections</p>
             <div className="profile-view-buttons">
-              <button className="profile-view-button">Contact info</button>
+              <div
+                className="profile-view-button-container"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <button className="profile-view-button">Contact info</button>
+                {isHovered && <div className="hover-text">Email address: {user?.email}</div>}
+              </div>
               {loggedInUser?.id === user?.id ? (
                 <p>Viewing your own public profile <Link to="/profile">Go to editable profile</Link></p>
               ) : (
@@ -162,9 +180,6 @@ const ProfileView = () => {
         <div className="profile-view-tabs">
           <div className={`profile-view-tab ${activeTab === 'highlights' ? 'active' : ''}`} onClick={() => handleTabClick('highlights')}>
             Highlights
-          </div>
-          <div className={`profile-view-tab ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => handleTabClick('posts')}>
-            Posts
           </div>
         </div>
 

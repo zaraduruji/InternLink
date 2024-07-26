@@ -306,9 +306,6 @@ const Profile = () => {
           <div className={`tab ${activeTab === 'highlights' ? 'active' : ''}`} onClick={() => handleTabClick('highlights')}>
             Highlights
           </div>
-          <div className={`tab ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => handleTabClick('posts')}>
-            Posts
-          </div>
         </div>
 
         <div className="profile-details">

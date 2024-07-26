@@ -5,7 +5,7 @@ import { faHome, faSearch, faUserFriends, faBell, faPlusSquare, faUser, faEllips
 import './Sidebar.css';
 import logo from '/logo.png';
 import SearchModal from '../SearchModal/SearchModal';
-import { UserContext } from '../UserContext';
+
 
 const Sidebar = ({ toggleDarkMode, darkMode, openCreatePostModal }) => {
   const [isMoreOpen, setIsMoreOpen] = useState(false);

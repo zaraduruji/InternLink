@@ -17,6 +17,7 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { addHours } from 'date-fns';
 import axios from 'axios';
+import suggestedConnectionsRoute from './suggestedConnections.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -1015,6 +1016,8 @@ app.delete('/api/posts/:id', async (req, res) => {
     res.status(400).json({ error: 'Error deleting post' });
   }
 });
+
+app.use('/api', suggestedConnectionsRoute);
 
 
 startServer();

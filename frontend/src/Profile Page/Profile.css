@@ -1,3 +1,27 @@
+.profile-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.hover-text {
+  display: none;
+  position: absolute;
+  top: -10px;
+  left: 100%;
+  background-color: #333;
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  transform: translateX(10px);
+  z-index: 1;
+}
+
+.profile-button-container:hover .hover-text {
+  display: block;
+}
+
 body.profile-body {
   background-color: #000;
   color: #fff;
