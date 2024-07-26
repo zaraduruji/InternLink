@@ -11,7 +11,7 @@ body.friends-body {
 .friends-content {
   flex-grow: 1;
   padding: 20px;
-  margin-left: 250px; /* Adjust to match the sidebar width */
+  margin-left: 250px;
   color: #fff;
 }
 
@@ -44,8 +44,8 @@ body.friends-body {
 
 .connection-name {
   font-weight: bold;
-  color: #ff6600; /* Change color to orange */
-  text-decoration: none; /* Remove underline */
+  color: #ff6600;
+  text-decoration: none;
 }
 
 .connection-role {

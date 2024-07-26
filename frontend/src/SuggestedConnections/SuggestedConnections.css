@@ -1,6 +1,6 @@
 .suggested-connections {
     padding: 1rem;
-    background-color: #000000; /* Pitch-black background */
+    background-color: #000000;
     color: white;
     margin-top: 20px;
   }
@@ -38,11 +38,11 @@
   }
 
   .name:hover {
-    color: orange; /* Orange color on hover */
+    color: orange;
     text-decoration: none;
   }
 
   .job-title {
     margin: 0;
-    color: #bbb; /* Light gray color for job title */
+    color: #bbb;
   }

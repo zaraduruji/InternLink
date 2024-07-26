@@ -54,7 +54,7 @@
   font-size: 1.5em;
   cursor: pointer;
   position: absolute;
-  right: 15px; /* Increase the value to move it more to the end */
+  right: 15px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -99,7 +99,7 @@
   color: #888;
 }
 
-/* Dark Mode Specific Styling */
+
 .dark-mode .search-modal {
   background: #121212;
   color: #e0e0e0;
@@ -135,7 +135,7 @@
   color: #a0a0a0;
 }
 
-/* Light Mode Specific Styling */
+
 .light-mode .search-modal {
   background: #fff;
   color: #000;
@@ -195,7 +195,7 @@
   background-color: #ff5733;
 }
 
-/* Light Mode Specific Styling */
+
 .light-mode .filter-buttons button {
   background-color: #f0f0f0;
   color: #000;

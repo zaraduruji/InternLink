@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import './SuggestedConnections.css'; // Import the CSS file
+import './SuggestedConnections.css';
 
 const SuggestedConnections = () => {
   const [suggestedConnections, setSuggestedConnections] = useState([]);
@@ -9,7 +9,7 @@ const SuggestedConnections = () => {
   const fetchSuggestedConnections = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/suggested-connections', { withCredentials: true });
-      setSuggestedConnections(response.data.slice(0, 3)); // Limit to 3 suggestions
+      setSuggestedConnections(response.data.slice(0, 3));
     } catch (error) {
       console.error('Error fetching suggested connections:', error);
     }

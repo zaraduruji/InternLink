@@ -19,10 +19,10 @@ function Post({ post, currentUser }) {
   const likePost = async (postId, userId) => {
     try {
       const response = await axios.post(`http://localhost:3000/api/posts/${postId}/like`, { userId });
-      return response.data; // Return the updated post
+      return response.data;
     } catch (error) {
       console.error('Error liking post:', error);
-      throw error; // Rethrow the error so it can be caught in the component
+      throw error;
     }
   };
 
@@ -43,7 +43,7 @@ function Post({ post, currentUser }) {
   const handleDelete = async () => {
     try {
       await axios.delete(`http://localhost:3000/api/posts/${post.id}`);
-      window.location.reload(); // Reload to see the post deleted
+      window.location.reload();
     } catch (error) {
       console.error('Error deleting post:', error);
     }

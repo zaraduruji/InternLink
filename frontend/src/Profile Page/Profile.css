@@ -61,7 +61,7 @@ body.profile-body {
 .profile-content {
   flex-grow: 1;
   padding: 20px;
-  margin-left: 200px; /* To avoid overlapping with the sidebar */
+  margin-left: 200px;
 }
 
 .profile-header {
@@ -133,7 +133,7 @@ body.profile-body {
 
 .highlights-section {
   padding: 20px 0;
-  border-top: 1px solid #333; /* Faint line demarcating the sections */
+  border-top: 1px solid #333;
 }
 
 .highlights-section .highlight {
@@ -146,10 +146,10 @@ body.profile-body {
 }
 
 .highlights-section .highlight:last-child {
-  border-bottom: none; /* Remove the bottom border for the last item */
+  border-bottom: none;
 }
 
-/* Modal CSS */
+
 .modal {
   position: fixed;
   top: 50%;
@@ -213,12 +213,12 @@ body.profile-body {
   display: none;
 }
 
-/* Profile.css */
+
 .upload-photo-button input[type="file"] {
   display: none;
 }
 
-/* Add styles for the video and canvas if needed */
+
 .modal video {
   width: 100%;
   border-radius: 8px;
@@ -232,10 +232,10 @@ body.profile-body {
   list-style-type: none;
   padding: 0;
   margin: 10px 0;
-  max-height: 200px; /* Adjust the height as needed */
-  overflow-y: auto; /* Add a scroll if the list is too long */
-  background: #333; /* Match the background color */
-  border-radius: 5px; /* Optional: Add some border-radius */
+  max-height: 200px;
+  overflow-y: auto;
+  background: #333;
+  border-radius: 5px;
 }
 
 .suggestions-list li {
@@ -250,16 +250,16 @@ body.profile-body {
 }
 
 .suggestions-list img {
-  width: 40px; /* Adjust the size of the logo */
+  width: 40px;
   height: 40px;
-  object-fit: contain; /* Ensure the image fits within the specified dimensions */
+  object-fit: contain;
   margin-right: 10px;
-  border-radius: 50%; /* Optional: Make the logos circular */
+  border-radius: 50%;
 }
 
 .suggestions-list span {
-  font-size: 16px; /* Adjust the font size */
-  color: #fff; /* Ensure the text color contrasts with the background */
+  font-size: 16px;
+  color: #fff;
 }
 
 .education-item {
@@ -330,10 +330,10 @@ textarea {
 }
 
 .suggestions-list img {
-  width: 30px; /* Adjust the size of the logo */
+  width: 30px;
   height: 30px;
   margin-right: 10px;
-  object-fit: contain; /* Ensure the image fits within the specified dimensions */
+  object-fit: contain;
 }
 
 textarea {
@@ -341,7 +341,7 @@ textarea {
   height: 150px;
 }
 
-/* Add this to your Profile.css */
+
 .connection-counter {
   background-color: #ff6600;
   color: white;

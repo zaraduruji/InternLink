@@ -51,7 +51,7 @@ const ProfileJobTitle = () => {
       if (response.ok) {
         const data = await response.json();
         updateUser(data.user);
-        navigate("/congratulations"); // Redirect to the congratulations page
+        navigate("/congratulations");
       } else {
         setError('Failed to save profile');
         console.log('Failed to save profile with status:', response.status);

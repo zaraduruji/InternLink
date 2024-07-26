@@ -12,7 +12,7 @@ body.profile-view-body {
   .profile-view-content {
     flex-grow: 1;
     padding: 20px;
-    margin-left: 200px; /* To avoid overlapping with the sidebar */
+    margin-left: 200px;
   }
 
   .profile-view-header {
@@ -108,23 +108,23 @@ body.profile-view-body {
 
   .profile-view-highlights-section {
     padding: 20px 0;
-    border-top: 1px solid #333; /* Faint line demarcating the sections */
+    border-top: 1px solid #333;
   }
 
   .profile-view-highlights-section .highlight {
     padding: 20px 0;
-    border-bottom: 1px solid #333; /* Faint line demarcating the sections */
+    border-bottom: 1px solid #333;
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Align text to the left */
-    width: 100%; /* Make lines wider */
+    align-items: flex-start;
+    width: 100%;
   }
 
   .profile-view-highlights-section .highlight:last-child {
-    border-bottom: none; /* Remove the bottom border for the last item */
+    border-bottom: none;
   }
 
-  /* Modal CSS */
+
   .profile-view-modal {
     position: fixed;
     top: 50%;

@@ -1,6 +1,6 @@
-import React, { useState, useContext, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import './Profile.css';
-import { UserContext } from '../UserContext';
 import Modal from 'react-modal';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
@@ -17,25 +17,26 @@ const Profile = () => {
       return null;
     }
   });
+  console.log(user)
   const fetchUser = async () => {
     try {
-      let user =  JSON.parse(localStorage.getItem('user'))
-      const response = await fetch(`http://localhost:3000/api/users/${user.id}`);
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      const response = await fetch(`http://localhost:3000/api/users/${storedUser.id}`);
       const data = await response.json();
-      console.log(data)
       setUser(data);
     } catch (error) {
       console.error(error);
     }
   };
-  useEffect(()=>{
+
+  useEffect(() => {
     document.body.classList.add('profile-body');
-    fetchUser()
+    fetchUser();
     return () => {
       document.body.classList.remove('profile-body');
     };
-  }, [])
-  console.log(user)
+  }, []);
+
   const updateUser = (newUserData) => {
     setUser((prevUser) => {
       const updatedUser = { ...prevUser, ...newUserData };
@@ -50,6 +51,8 @@ const Profile = () => {
   const [cameraModalIsOpen, setCameraModalIsOpen] = useState(false);
   const [educationModalIsOpen, setEducationModalIsOpen] = useState(false);
   const [aboutModalIsOpen, setAboutModalIsOpen] = useState(false);
+  const [experienceModalIsOpen, setExperienceModalIsOpen] = useState(false);
+  const [skillsModalIsOpen, setSkillsModalIsOpen] = useState(false);
   const [about, setAbout] = useState(user?.about || '');
   const [stream, setStream] = useState(null);
   const [educationDetails, setEducationDetails] = useState({
@@ -59,6 +62,13 @@ const Profile = () => {
     endDate: '',
     grade: '',
   });
+  const [experienceDetails, setExperienceDetails] = useState({
+    company: '',
+    position: '',
+    startDate: '',
+    endDate: '',
+  });
+  const [skillDetails, setSkillDetails] = useState('');
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -174,12 +184,40 @@ const Profile = () => {
     setAboutModalIsOpen(false);
   };
 
+  const openExperienceModal = () => {
+    setExperienceModalIsOpen(true);
+  };
+
+  const closeExperienceModal = () => {
+    setExperienceModalIsOpen(false);
+  };
+
+  const openSkillsModal = () => {
+    setSkillsModalIsOpen(true);
+  };
+
+  const closeSkillsModal = () => {
+    setSkillsModalIsOpen(false);
+  };
+
   const handleEducationChange = (event) => {
     const { name, value } = event.target;
     setEducationDetails((prevDetails) => ({
       ...prevDetails,
       [name]: value,
     }));
+  };
+
+  const handleExperienceChange = (event) => {
+    const { name, value } = event.target;
+    setExperienceDetails((prevDetails) => ({
+      ...prevDetails,
+      [name]: value,
+    }));
+  };
+
+  const handleSkillChange = (event) => {
+    setSkillDetails(event.target.value);
   };
 
   const handleAboutChange = (event) => {
@@ -237,6 +275,79 @@ const Profile = () => {
       .then((data) => {
         updateUser(data.user);
         closeEducationModal();
+      })
+      .catch((error) => {
+        console.error('Error updating profile:', error);
+        alert(`Failed to update profile: ${error.message}`);
+      });
+  };
+
+  const saveExperienceDetails = () => {
+    const updatedExperience = {
+      company: experienceDetails.company,
+      position: experienceDetails.position,
+      startDate: experienceDetails.startDate,
+      endDate: experienceDetails.endDate,
+    };
+    console.log('Sending experience data:', updatedExperience);
+
+    const allExperience = user.experience ? [...user.experience, updatedExperience] : [updatedExperience];
+
+    fetch('http://localhost:3000/update-profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify
+
+({
+        userId: user.id,
+        experience: allExperience,
+      }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        }
+        return data;
+      })
+      .then((data) => {
+        updateUser(data.user);
+        closeExperienceModal();
+      })
+      .catch((error) => {
+        console.error('Error updating profile:', error);
+        alert(`Failed to update profile: ${error.message}`);
+      });
+  };
+
+  const saveSkillDetails = () => {
+    const newSkill = {
+      name: skillDetails,
+    };
+    const allSkills = user.skills ? [...user.skills, newSkill] : [newSkill];
+
+    fetch('http://localhost:3000/update-profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        skills: allSkills,
+      }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        }
+        return data;
+      })
+      .then((data) => {
+        updateUser(data.user);
+        closeSkillsModal();
       })
       .catch((error) => {
         console.error('Error updating profile:', error);
@@ -313,7 +424,13 @@ const Profile = () => {
             <div className="highlights-section">
               <div className="highlight">
                 <h3>Experience</h3>
-                <p>This is the Experience section. Add your work experiences here.</p>
+                {user?.experience?.map((exp, index) => (
+                  <div key={index} className="experience-item">
+                    <h4>{exp.company}</h4>
+                    <p>{exp.position}</p>
+                    <p>{`${exp.startDate} - ${exp.endDate}`}</p>
+                  </div>
+                ))}
               </div>
               <div className="highlight">
                 <h3>Education</h3>
@@ -330,7 +447,11 @@ const Profile = () => {
               </div>
               <div className="highlight">
                 <h3>Skills</h3>
-                <p>This is the Skills section. Add your skills here.</p>
+                {user?.skills?.map((skill, index) => (
+                  <div key={index} className="skill-item">
+                    <p>{skill.name}</p>
+                  </div>
+                ))}
               </div>
               <div className="highlight">
                 <h3>About</h3>
@@ -361,8 +482,8 @@ const Profile = () => {
           <p className="modal-option" onClick={openPhotoModal}>Add profile photo</p>
           <p className="modal-option" onClick={openAboutModal}>{about ? 'Edit about' : 'Add about'}</p>
           <p className="modal-option" onClick={openEducationModal}>Add education</p>
-          <p className="modal-option">Add experience</p>
-          <p className="modal-option">Add skills</p>
+          <p className="modal-option" onClick={openExperienceModal}>Add experience</p>
+          <p className="modal-option" onClick={openSkillsModal}>Add skills</p>
         </div>
         <button className="modal-close" onClick={closeModal}>Close</button>
       </Modal>
@@ -432,7 +553,9 @@ const Profile = () => {
         <input
           type="date"
           name="endDate"
-          value={educationDetails.endDate}
+          value={educationDetails
+
+.endDate}
           onChange={handleEducationChange}
           placeholder="End Date"
         />
@@ -462,6 +585,64 @@ const Profile = () => {
         />
         <button className="modal-button" onClick={saveAbout}>Save</button>
         <button className="modal-close" onClick={closeAboutModal}>Close</button>
+      </Modal>
+
+      <Modal
+        isOpen={experienceModalIsOpen}
+        onRequestClose={closeExperienceModal}
+        contentLabel="Add Experience Modal"
+        className="modal"
+        overlayClassName="overlay"
+      >
+        <h2>Add experience</h2>
+        <input
+          type="text"
+          name="company"
+          value={experienceDetails.company}
+          onChange={handleExperienceChange}
+          placeholder="Company"
+        />
+        <input
+          type="text"
+          name="position"
+          value={experienceDetails.position}
+          onChange={handleExperienceChange}
+          placeholder="Position"
+        />
+        <input
+          type="date"
+          name="startDate"
+          value={experienceDetails.startDate}
+          onChange={handleExperienceChange}
+          placeholder="Start Date"
+        />
+        <input
+          type="date"
+          name="endDate"
+          value={experienceDetails.endDate}
+          onChange={handleExperienceChange}
+          placeholder="End Date"
+        />
+        <button className="modal-button" onClick={saveExperienceDetails}>Save</button>
+        <button className="modal-close" onClick={closeExperienceModal}>Close</button>
+      </Modal>
+
+      <Modal
+        isOpen={skillsModalIsOpen}
+        onRequestClose={closeSkillsModal}
+        contentLabel="Add Skills Modal"
+        className="modal"
+        overlayClassName="overlay"
+      >
+        <h2>Add skills</h2>
+        <input
+          type="text"
+          value={skillDetails}
+          onChange={handleSkillChange}
+          placeholder="Skill"
+        />
+        <button className="modal-button" onClick={saveSkillDetails}>Save</button>
+        <button className="modal-close" onClick={closeSkillsModal}>Close</button>
       </Modal>
 
       <SearchModal isOpen={searchModalOpen} onClose={() => setSearchModalOpen(false)} darkMode={darkMode} />

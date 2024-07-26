@@ -54,10 +54,10 @@ export function PostProvider({ children }) {
       setPosts(prevPosts => prevPosts.map(post =>
         post.id === postId ? { ...post, ...response.data } : post
       ));
-      return response.data; // Return the updated post
+      return response.data;
     } catch (error) {
       console.error('Error liking post:', error);
-      throw error; // Rethrow the error so it can be caught in the component
+      throw error;
     }
   };
 

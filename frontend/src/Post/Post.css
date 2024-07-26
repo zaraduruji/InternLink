@@ -63,7 +63,7 @@
 .post-actions {
   display: flex;
   align-items: center;
-  gap: 10px; /* Add space between like and comment buttons */
+  gap: 10px;
 }
 
 .post-action-icon {
@@ -132,14 +132,14 @@
 }
 
 .dark-mode .post-action-icon {
-  color: #fff; /* White icons in dark mode */
+  color: #fff;
 }
 
 .light-mode .post-action-icon {
-  color: #000; /* Black icons in light mode */
+  color: #000;
 }
 
-/* Ensure liked icon color overrides theme color */
+
 .dark-mode .post-action-icon.liked {
   color: red;
 }

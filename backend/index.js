@@ -72,7 +72,7 @@ app.use(
 
 sessionStore.sync();
 
-// Load GraphQL schema
+
 const typeDefs = fs.readFileSync(
   path.join(__dirname, 'schema.graphql'),
   'utf8'
@@ -169,7 +169,7 @@ const resolvers = {
       if (!story) {
         throw new Error('Story not found');
       }
-      // Get the user's connections
+
       const connections = await prisma.connection.findMany({
         where: {
           OR: [
@@ -179,7 +179,7 @@ const resolvers = {
           status: 'CONNECTED'
         },
       });
-      // Create notifications for all connections
+
       const notifications = await Promise.all(
         connections.map(async (connection) => {
           const recipientId = connection.userId === story.userId ? connection.friendId : connection.userId;
@@ -194,7 +194,7 @@ const resolvers = {
           });
         })
       );
-      // Return the first notification (you might want to adjust this based on your needs)
+
       return notifications[0];
     },
     deleteNotification: async (_, { notificationId }) => {
@@ -220,10 +220,10 @@ const resolvers = {
   },
 };
 
-// Create Apollo Server
+
 const server = new ApolloServer({ typeDefs, resolvers });
 
-// Existing routes
+
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
@@ -270,7 +270,7 @@ app.post('/login', async (req, res) => {
 
 app.put('/update-profile', async (req, res) => {
   console.log('Received update profile request:', req.body);
-  const { userId, firstName, lastName, location, jobTitle, about, education, profilePicture } = req.body;
+  const { userId, firstName, lastName, location, jobTitle, about, education, profilePicture, experience, skills } = req.body;
 
   if (!userId) {
     return res.status(400).json({ error: 'userId is required' });
@@ -304,9 +304,30 @@ app.put('/update-profile', async (req, res) => {
             }))
           }
         }),
+        ...(experience !== undefined && {
+          experience: {
+            deleteMany: {},
+            create: experience.map(exp => ({
+              company: exp.company,
+              position: exp.position,
+              startDate: new Date(exp.startDate),
+              endDate: new Date(exp.endDate)
+            }))
+          }
+        }),
+        ...(skills !== undefined && {
+          skills: {
+            deleteMany: {},
+            create: skills.map(skill => ({
+              name: skill.name
+            }))
+          }
+        })
       },
       include: {
-        education: true
+        education: true,
+        experience: true,
+        skills: true
       }
     });
 
@@ -321,16 +342,6 @@ app.put('/update-profile', async (req, res) => {
   }
 });
 
-// app.get('/api/job-listings', (req, res) => {
-//   const jsonFilePath = path.join(process.cwd(), 'jobListings.json');
-//   fs.readFile(jsonFilePath, 'utf8', (err, data) => {
-//     if (err) {
-//       res.status(500).send('Error reading JSON file');
-//       return;
-//     }
-//     res.json(JSON.parse(data));
-//   });
-// });
 
 app.get('/api/search', async (req, res) => {
   const query = req.query.q ? req.query.q.toLowerCase() : '';
@@ -408,7 +419,7 @@ app.post('/uploadPicture', async (req, res) => {
 app.post('/api/send-friend-request', async (req, res) => {
   const { userId, targetUserId } = req.body;
   try {
-    // Check if users are already connected
+
     const existingConnection = await prisma.connection.findFirst({
       where: {
         OR: [
@@ -430,7 +441,7 @@ app.post('/api/send-friend-request', async (req, res) => {
       return res.status(400).json({ message: 'You are already connected with this user' });
     }
 
-    // Check if a friend request already exists
+
     const existingFriendRequest = await prisma.friendRequest.findFirst({
       where: {
         OR: [
@@ -450,7 +461,7 @@ app.post('/api/send-friend-request', async (req, res) => {
       return res.status(400).json({ message: 'A friend request is already pending with this user' });
     }
 
-    // Create new friend request
+
     const friendRequest = await prisma.friendRequest.create({
       data: {
         requesterId: parseInt(userId, 10),
@@ -459,20 +470,20 @@ app.post('/api/send-friend-request', async (req, res) => {
       },
     });
 
-    // Fetch the requester's name
+
     const requester = await prisma.user.findUnique({
       where: { id: parseInt(userId, 10) },
       select: { firstName: true, lastName: true }
     });
 
-    // Create a notification for the recipient
+
     await prisma.notification.create({
       data: {
         userId: parseInt(targetUserId, 10),
         type: 'FRIEND_REQUEST',
         content: `You have a new friend request from ${requester.firstName} ${requester.lastName}`,
         createdAt: new Date(),
-        friendRequestId: friendRequest.id // Store the friend request ID
+        friendRequestId: friendRequest.id
       },
     });
 
@@ -499,7 +510,7 @@ app.get('/api/connections/:userId', async (req, res) => {
       },
     });
 
-    // Format the response to return the relevant user data
+
     const formattedConnections = connections.map((connection) => {
       const isRequester = connection.userId === parseInt(userId, 10);
       return {
@@ -562,11 +573,11 @@ app.post('/api/stories', upload.single('story'), async (req, res) => {
       data: {
         userId: parseInt(userId, 10),
         fileUrl: result.secure_url,
-        expiresAt: addHours(new Date(), 24), // Set expiration to 24 hours from now
+        expiresAt: addHours(new Date(), 24),
       },
     });
 
-    // Create notifications for connections
+
     const user = await prisma.user.findUnique({
       where: { id: parseInt(userId, 10) },
       select: { firstName: true, lastName: true },
@@ -607,7 +618,7 @@ app.get('/api/stories', async (req, res) => {
     const stories = await prisma.story.findMany({
       where: {
         expiresAt: {
-          gte: new Date(), // Only fetch stories that haven't expired
+          gte: new Date(),
         },
       },
       include: {
@@ -625,7 +636,7 @@ app.get('/api/stories', async (req, res) => {
       },
     });
 
-    // Group stories by user
+
     const groupedStories = stories.reduce((acc, story) => {
       if (!acc[story.userId]) {
         acc[story.userId] = {
@@ -663,7 +674,7 @@ app.delete('/api/stories/expired', async (req, res) => {
     const expiredStories = await prisma.story.deleteMany({
       where: {
         expiresAt: {
-          lt: new Date(), // Delete stories where expiresAt is less than current time
+          lt: new Date(),
         },
       },
     });
@@ -678,9 +689,11 @@ app.get('/api/users/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(id, 10) },
+      where: { id: parseInt(id) },
       include: {
-        education: true
+        education: true,
+        experience: true,
+        skills: true,
       }
     });
     if (user) {
@@ -740,7 +753,7 @@ app.get('/api/posts', async (req, res) => {
         },
         comments: {
           include: {
-          user: true // Assuming you want to include user information
+          user: true
         }
       }
       },
@@ -754,7 +767,7 @@ app.get('/api/posts', async (req, res) => {
   }
 });
 
-// POST a new post
+
 app.post('/api/posts', upload.single('image'), async (req, res) => {
   console.log('Received post request:', req.body);
   console.log('File:', req.file);
@@ -806,7 +819,7 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
 });
 
 
-// DELETE a post
+
 app.delete('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -819,7 +832,7 @@ app.delete('/api/posts/:id', async (req, res) => {
   }
 });
 
-// UPDATE a post
+
 app.put('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
   const { content } = req.body;
@@ -879,7 +892,7 @@ app.get('/api/posts/:id/comments', async (req, res) => {
       include: {
         comments: {
           include: {
-            user: true // Assuming you want to include user information
+            user: true
           }
         }
       }
@@ -912,13 +925,13 @@ app.post('/api/posts/:id/like', async (req, res) => {
     const existingLike = post.likes.find(like => like.userId === parseInt(userId));
 
     if (existingLike) {
-      // Unlike the post
+
       await prisma.like.delete({
         where: { id: existingLike.id }
       });
       post.likeCount -= 1;
     } else {
-      // Like the post
+
       await prisma.like.create({
         data: {
           userId: parseInt(userId),
@@ -928,7 +941,7 @@ app.post('/api/posts/:id/like', async (req, res) => {
       post.likeCount += 1;
     }
 
-    // Update this part
+
     const updatedPost = await prisma.post.update({
       where: { id: parseInt(id) },
       data: { likeCount: post.likeCount },
@@ -961,7 +974,7 @@ app.get('/auth/linkedIn/callback', async (req, res) => {
       throw new Error('Missing code or state in query parameters');
     }
 
-    // Exchange code for access token
+
     const tokenResponse = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', qs.stringify({
       grant_type: 'authorization_code',
       code,
@@ -976,23 +989,13 @@ app.get('/auth/linkedIn/callback', async (req, res) => {
 
     const accessToken = tokenResponse.data.access_token;
 
-    // Fetch user profile
+
     const profileResponse = await axios.get('https://api.linkedin.com/v2/userinfo', {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
 
-    // Fetch profile picture
-    // const profilePictureResponse = await axios.get('https://api.linkedin.com/v2/me?projection=(id,profilePicture(displayImage~:playableStreams))', {
-    //   headers: { Authorization: `Bearer ${accessToken}` }
-    // });
-
     const profilePictureUrl = profileResponse.data.picture;
 
-    // // Download profile picture
-    // const pictureResponse = await axios.get(profilePictureUrl, { responseType: 'arraybuffer' });
-    // const buffer = Buffer.from(pictureResponse.data, 'binary');
-
-    // // Respond with profile data and profile picture
     res.json({
       success: true,
       profile: profileResponse.data,
@@ -1004,7 +1007,7 @@ app.get('/auth/linkedIn/callback', async (req, res) => {
   }
 });
 
-// DELETE a post
+
 app.delete('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
   try {

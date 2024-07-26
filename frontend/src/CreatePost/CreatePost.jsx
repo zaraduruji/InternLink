@@ -18,7 +18,7 @@ function CreatePost({ isOpen, onClose, onPostCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!postContent.trim()) return; // Prevent empty posts
+    if (!postContent.trim()) return;
 
     setIsSubmitting(true);
 

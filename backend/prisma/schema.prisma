@@ -100,19 +100,6 @@ model FriendRequest {
   notifications Notification[]
 }
 
-// model JobListing {
-//   id                 Int       @id @default(autoincrement())
-//   role               String
-//   userProfilePicture String
-//   imageUrl           String?
-//   description        String
-//   timestamp          DateTime  @default(now())
-//   companyName        String
-//   uploaderName       String
-//   likeCount          Int?      @default(0)
-//   comments           Comment[]
-// }
-
 model Comment {
   id        Int      @id @default(autoincrement())
   content   String
@@ -131,7 +118,7 @@ model Story {
   createdAt     DateTime      @default(now())
   expiresAt     DateTime
   user          User          @relation("userStory", fields: [userId], references: [id])
-  notifications Notification[] // New relation
+  notifications Notification[]
 }
 
 model Post {
@@ -144,7 +131,7 @@ model Post {
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   comments  Comment[]
-  likes     Like[]   // Add this line
+  likes     Like[]
 }
 
 model Like {
@@ -157,4 +144,3 @@ model Like {
 
   @@unique([postId, userId])
 }
-  

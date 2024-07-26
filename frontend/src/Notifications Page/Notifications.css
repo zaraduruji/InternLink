@@ -6,7 +6,7 @@
   bottom: 0;
   width: 300px;
   background-color: #000000; /* Match the background color with homepage and sidebar */
-  color: #ffffff; /* Ensure text color is white */
+  color: #ffffff;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   overflow-y: auto;
@@ -23,7 +23,7 @@
 
 .notifications-tabs {
   display: flex;
-  border-bottom: 1px solid #555555; /* Match the border color */
+  border-bottom: 1px solid #555555;
   margin-bottom: 20px;
 }
 
@@ -31,7 +31,7 @@
   padding: 10px 20px;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
-  color: #ffffff; /* Ensure text color is white */
+  color: #ffffff;
 }
 
 .tab:hover {
@@ -39,8 +39,8 @@
 }
 
 .tab.active {
-  border-bottom: 2px solid #ff5733; /* Use orange for active tab */
-  color: #ff5733; /* Use orange for active tab */
+  border-bottom: 2px solid #ff5733;
+  color: #ff5733;
 }
 
 .notifications-section {
@@ -55,11 +55,11 @@
 
 .notification {
   padding: 10px;
-  border-bottom: 1px solid #555555; /* Match the border color */
+  border-bottom: 1px solid #555555;
   position: relative;
   background-color: transparent;
   transition: background-color 0.2s ease;
-  color: #ffffff; /* Ensure text color is white */
+  color: #ffffff;
 }
 
 .notification:hover {
@@ -70,7 +70,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  border: 2px solid #ff5733; /* Use orange for read indicator */
+  border: 2px solid #ff5733;
   position: absolute;
   top: 10px;
   right: 10px;
@@ -83,7 +83,7 @@
 }
 
 .notification.read .read-indicator {
-  background-color: #ff5733; /* Use orange for read indicator */
+  background-color: #ff5733;
 }
 
 .friend-request-actions {
@@ -92,7 +92,7 @@
 
 .friend-request-actions button {
   margin-right: 10px;
-  background-color: #ff5733; /* Use orange for buttons */
+  background-color: #ff5733;
   color: #ffffff;
   border: none;
   padding: 5px 10px;
@@ -101,7 +101,7 @@
 }
 
 .friend-request-actions button:hover {
-  background-color: #cc4726; /* Darker shade of orange for hover */
+  background-color: #cc4726;
   transform: translateY(-2px);
 }
 
@@ -110,7 +110,7 @@
 }
 
 .view-button {
-  background-color: #ff5733; /* Use orange for buttons */
+  background-color: #ff5733;
   color: #ffffff;
   border: none;
   padding: 5px 10px;
@@ -120,7 +120,7 @@
 }
 
 .view-button:hover {
-  background-color: #cc4726; /* Darker shade of orange for hover */
+  background-color: #cc4726;
   transform: translateY(-2px);
 }
 
@@ -129,7 +129,7 @@
 }
 
 .delete-button {
-  background-color: red; /* Use red for delete button */
+  background-color: red;
   color: #ffffff;
   border: none;
   padding: 5px 10px;
@@ -139,7 +139,7 @@
 }
 
 .delete-button:hover {
-  background-color: darkred; /* Darker shade of red for hover */
+  background-color: darkred;
   transform: translateY(-2px);
 }
 

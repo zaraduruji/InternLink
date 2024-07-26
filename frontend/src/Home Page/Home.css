@@ -55,7 +55,7 @@ body {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  border-bottom: 1px solid #333; /* Faint line demarcating each post */
+  border-bottom: 1px solid #333;
 }
 
 .post-header {
@@ -161,25 +161,9 @@ body {
 
 .light-mode .post {
   background-color: #fff;
-  border-bottom: 1px solid #ddd; /* Light mode faint line */
+  border-bottom: 1px solid #ddd;
 }
 
-/* .search-modal {
-  position: fixed;
-  top: 0;
-  left: 80px;
-  width: 400px;
-  height: 100%;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-} */
-
-/* .search-modal.open {
-  transform: translateX(0);
-} */
 
 .search-header {
   font-size: 1.5em;
@@ -264,7 +248,7 @@ body {
   display: none;
 }
 
-/* Dark Mode Specific Styling */
+
 .dark-mode .search-modal {
   background: #121212;
   color: #e0e0e0;
@@ -300,7 +284,7 @@ body {
   color: #a0a0a0;
 }
 
-/* Light Mode Specific Styling */
+
 .light-mode .search-modal {
   background: #fff;
   color: #000;
@@ -360,7 +344,7 @@ body {
   background-color: #ff5733;
 }
 
-/* Light Mode Specific Styling */
+
 .light-mode .filter-buttons button {
   background-color: #f0f0f0;
   color: #000;

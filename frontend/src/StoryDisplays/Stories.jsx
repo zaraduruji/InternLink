@@ -44,7 +44,7 @@ const Stories = ({ currentUser }) => {
         body: formData,
       });
       if (response.ok) {
-        await fetchStories(); // Fetch the updated list of stories
+        await fetchStories();
       } else {
         console.error('Failed to upload story');
       }
@@ -123,9 +123,7 @@ const Stories = ({ currentUser }) => {
         method: 'DELETE',
       });
       if (response.ok) {
-        // Remove the story from the local state
         setStories(prevStories => prevStories.filter(story => story.id !== storyId));
-        // Update the viewingStories state
         setViewingStories(prevViewingStories => {
           const updatedViewingStories = prevViewingStories.map(user => ({
             ...user,

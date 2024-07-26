@@ -1,5 +1,3 @@
-// src/ProfileSetup/ProfileLocation.jsx
-
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../UserContext';
@@ -8,7 +6,6 @@ import './ProfileSetup.css';
 const ProfileLocation = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
-    // Initialize user state from localStorage
     const storedUser = localStorage.getItem('user');
     try {
       return storedUser ? JSON.parse(storedUser) : null;
@@ -33,7 +30,6 @@ const ProfileLocation = () => {
   const updateUser = (newUserData) => {
     setUser(prevUser => {
       const updatedUser = { ...prevUser, ...newUserData };
-      // Store updated user in localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     });

@@ -50,10 +50,10 @@ if (data.success && data.profilePicture) {
           updateUser({
             ...result
           });
-          navigate('/profile'); // Redirect to profile page
+          navigate('/profile');
         } else {
           console.error('LinkedIn authentication failed');
-          navigate('/profile'); // Redirect to profile page even on failure
+          navigate('/profile');
         }
       } catch (error) {
         console.error('Error fetching LinkedIn data:', error);

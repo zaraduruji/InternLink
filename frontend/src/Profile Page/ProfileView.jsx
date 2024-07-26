@@ -19,7 +19,7 @@ const ProfileView = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // State for hover effect
+
   const [isHovered, setIsHovered] = useState(false);
 
   const fetchUser = async () => {
@@ -99,7 +99,7 @@ const ProfileView = () => {
       if (response.ok) {
         setPendingRequests((prev) => ({ ...prev, [user.id]: true }));
         console.log(data.message);
-        fetchConnectionCount(); // Refetch the connection count
+        fetchConnectionCount();
       } else {
         console.error('Error:', data.message);
       }
@@ -116,7 +116,7 @@ const ProfileView = () => {
       const data = await response.json();
       if (response.ok) {
         setIsConnected(false);
-        fetchConnectionCount(); // Refetch the connection count
+        fetchConnectionCount();
       } else {
         console.error('Error:', data.message);
       }

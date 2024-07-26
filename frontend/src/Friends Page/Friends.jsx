@@ -63,7 +63,7 @@ const Friends = () => {
                 <Link to={`/profile/${connection.friendId}`} className="connection-name">
                   {connection.friend.firstName} {connection.friend.lastName}
                 </Link>
-                <p className="connection-role">{connection.friend.jobTitle}</p> {/* Ensure this is the correct field name */}
+                <p className="connection-role">{connection.friend.jobTitle}</p>
                 <p className="connection-location">{connection.friend.location}</p>
               </div>
               <button className="remove-button" onClick={() => handleRemoveConnection(connection.friendId)}>

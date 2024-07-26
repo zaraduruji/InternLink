@@ -1,12 +1,5 @@
-/* src/Login Page/Login.css */
-
-.login-modal-background {
-  /* Add any styles for the background */
-}
-
 .login-modal-content {
   text-align: center;
-  /* Add any additional styles for modal content */
 }
 
 .login-title {
@@ -25,7 +18,7 @@
   margin-bottom: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  color: #333; /* Default color */
+  color: #333;
 }
 
 .login-password {
@@ -34,8 +27,8 @@
 }
 
 .login-password-visible {
-  color: #000; /* Ensure the font color is visible */
-  background-color: #fff; /* Ensure the background color is white */
+  color: #000;
+  background-color: #fff;
 }
 
 .login-password-container {

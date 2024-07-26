@@ -16,7 +16,7 @@
   padding: 20px;
   border-radius: 8px;
   width: 90%;
-  max-width: 700px; /* Increase the maximum width */
+  max-width: 700px;
   max-height: 80vh;
   overflow-y: auto;
   position: relative;
@@ -62,7 +62,7 @@
 .user-name {
   margin: 0;
   font-size: 18px;
-  color: inherit; /* Ensure the color adapts to the theme */
+  color: inherit;
 }
 
 .post-visibility {
