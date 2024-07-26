@@ -1,4 +1,4 @@
-body {
+body.profile-body {
   background-color: #000;
   color: #fff;
   margin: 0;
@@ -114,11 +114,11 @@ body {
 
 .highlights-section .highlight {
   padding: 20px 0;
-  border-bottom: 1px solid #333; /* Faint line demarcating the sections */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Align text to the left */
-  width: 100%; /* Make lines wider */
+    border-bottom: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
 }
 
 .highlights-section .highlight:last-child {

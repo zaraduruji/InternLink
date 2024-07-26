@@ -11,7 +11,11 @@ const Friends = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    document.body.classList.add('friends-body');
     fetchConnections();
+    return () => {
+      document.body.classList.remove('friends-body');
+    };
   }, []);
 
   const fetchConnections = async () => {

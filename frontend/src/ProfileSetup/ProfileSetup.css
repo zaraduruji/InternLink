@@ -1,46 +1,122 @@
 /* src/ProfileSetup/ProfileSetup.css */
-body{
-    color: #ccc;
+body {
+  color: #ccc;
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
+
 .profile-setup-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #121212; /* Dark background */
+  color: #ffffff; /* White text */
+  transition: opacity 0.5s ease-in-out;
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+}
 
-  .profile-setup-form h2 {
-    margin-bottom: 20px;
+@keyframes fadeIn {
+  to {
+    opacity: 1;
   }
+}
 
-  .profile-setup-form form {
-    display: flex;
-    flex-direction: column;
-    width: 300px;
-  }
+.profile-setup-form h2 {
+  font-size: 2em;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #ff6600; /* Bright color for heading */
+  text-align: center; /* Center align the heading text */
+  animation: slideIn 0.5s ease-in-out;
+}
 
-  .profile-setup-form input,
-  .profile-setup-form select {
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
   }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
-  .signup-button {
-    background-color: #ff5733;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+.profile-setup-form form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #1e1e1e; /* Slightly lighter background for form */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  animation: slideIn 0.5s ease-in-out;
+}
 
-  .signup-button:hover {
-    background-color: #f38269
-  }
+.profile-setup-form label {
+  width: 100%;
+  color: #ccc;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  text-align: left; /* Align labels to the left */
+  transition: color 0.3s;
+}
 
-  .error {
-    color: red;
-    margin-bottom: 10px;
-  }
+.profile-setup-form input,
+.profile-setup-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  background-color: #2b2b2b; /* Darker input background */
+  color: #fff; /* White text color */
+  transition: border-color 0.3s, background-color 0.3s;
+}
+
+.profile-setup-form input:focus,
+.profile-setup-form select:focus {
+  border-color: #ff6600;
+  background-color: #333;
+}
+
+.profile-setup-form input::placeholder,
+.profile-setup-form select {
+  color: #aaa; /* Lighter color for placeholder text */
+}
+
+.profile-setup-form .error {
+  color: red;
+  margin-bottom: 10px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.profile-setup-button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #ff6600; /* Bright button color */
+  color: #fff;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.profile-setup-button:hover {
+  background-color: #f38269; /* Lighter shade on hover */
+  transform: scale(1.05);
+}
+
+.profile-setup-button:active {
+  transform: scale(0.95);
+}
+
+/* Ensuring white text color for all input fields */
+.profile-setup-form input {
+  color: #fff !important;
+}

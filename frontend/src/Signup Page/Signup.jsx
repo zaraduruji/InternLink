@@ -1,9 +1,6 @@
-// src/Signup Page/Signup.jsx
-
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import './Signup.css';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../UserContext';
 
 const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
   const navigate = useNavigate();
@@ -75,6 +72,13 @@ const Signup = ({ setShowLoginModal, setShowSignupModal }) => {
           className='signup-input'
         />
         {error && <div className="signup-error">{error}</div>}
+        <p className='signup-agreement'>
+          By clicking Continue to join or sign in, you agree to InternLink’s
+          <a href="/user-agreement" target="_blank" rel="noopener noreferrer"> User Agreement</a>,
+          <a href="/privacy-policy" target="_blank" rel="noopener noreferrer"> Privacy Policy</a>,
+          and
+          <a href="/cookie-policy" target="_blank" rel="noopener noreferrer"> Cookie Policy</a>.
+        </p>
         <button type="submit" className='signup-button'>Agree & Join</button>
         <p className='signup-message'>Already on InternLink? <a href="#" onClick={handleLoginClick}>Log In</a></p>
       </form>

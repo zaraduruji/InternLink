@@ -1,0 +1,181 @@
+/* ProfileView.css */
+body.profile-view-body {
+    background-color: #000;
+    color: #fff;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  .profile-view-page {
+    display: flex;
+  }
+
+  .profile-view-content {
+    flex-grow: 1;
+    padding: 20px;
+    margin-left: 200px; /* To avoid overlapping with the sidebar */
+  }
+
+  .profile-view-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #333;
+  }
+
+  .profile-view-picture img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 20px;
+  }
+
+  .profile-view-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .profile-view-info h2 {
+    margin: 0;
+  }
+
+  .profile-view-info p {
+    margin: 5px 0;
+  }
+
+  .profile-view-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .profile-view-button {
+    background-color: #ff6600;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .profile-view-button:hover {
+    background-color: #e65c00;
+  }
+
+  .profile-view-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+  }
+
+  .profile-view-tab {
+    cursor: pointer;
+    padding: 10px;
+    flex-grow: 1;
+    text-align: center;
+    border-bottom: 2px solid transparent;
+  }
+
+  .profile-view-tab.active {
+    border-bottom: 2px solid #ff6600;
+  }
+
+  .profile-view-details {
+    padding: 20px;
+  }
+
+  .profile-view-highlights-section {
+    padding: 20px 0;
+    border-top: 1px solid #333; /* Faint line demarcating the sections */
+  }
+
+  .profile-view-highlights-section .highlight {
+    padding: 20px 0;
+    border-bottom: 1px solid #333; /* Faint line demarcating the sections */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align text to the left */
+    width: 100%; /* Make lines wider */
+  }
+
+  .profile-view-highlights-section .highlight:last-child {
+    border-bottom: none; /* Remove the bottom border for the last item */
+  }
+
+  /* Modal CSS */
+  .profile-view-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #222;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    color: #fff;
+    outline: none;
+  }
+
+  .profile-view-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .profile-view-modal-button, .profile-view-modal-close {
+    background-color: #ff6600;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .profile-view-modal-button:hover, .profile-view-modal-close:hover {
+    background-color: #e65c00;
+  }
+
+  .profile-view-modal-options {
+    margin-top: 10px;
+  }
+
+  .profile-view-modal-option {
+    cursor: pointer;
+    padding: 10px 0;
+    border-bottom: 1px solid #333;
+  }
+
+  .profile-view-modal-option:hover {
+    color: #ff6600;
+  }
+
+  .profile-view-modal-subtext {
+    color: #aaa;
+    font-size: 0.9em;
+  }
+
+  .profile-view-photo-options {
+    display: flex;
+    gap: 10px;
+  }
+
+  .profile-view-upload-photo-button input[type="file"] {
+    display: none;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    color: black;
+  }
+
+  textarea {
+    resize: none;
+    height: 150px;
+  }

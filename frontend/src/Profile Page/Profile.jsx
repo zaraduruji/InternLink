@@ -29,7 +29,11 @@ const Profile = () => {
     }
   };
   useEffect(()=>{
-fetchUser()
+    document.body.classList.add('profile-body');
+    fetchUser()
+    return () => {
+      document.body.classList.remove('profile-body');
+    };
   }, [])
   console.log(user)
   const updateUser = (newUserData) => {

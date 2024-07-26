@@ -16,6 +16,7 @@ import Friends from './Friends Page/Friends';
 import Notifications from './Notifications Page/Notifications.jsx';
 import CreatePost from './CreatePost/CreatePost.jsx';
 import LinkedInCallback from './LinkedInCallback.jsx';
+import Congratulations from './Congratulations Page/Congratulations.jsx';
 
 const client = new ApolloClient({
   uri: 'http://localhost:3000/graphql',
@@ -63,6 +64,7 @@ function App() {
               <Route path="/friends" element={<Friends />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/auth/linkedin/callback" element={<LinkedInCallback />} />
+              <Route path="/congratulations" element={<Congratulations />} />
             </Routes>
           </Router>
     </ApolloProvider>

@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import './Profile.css';
+import './ProfileView.css';
 import defaultProfilePic from '../../public/defaultProfilePic.png';
 import Sidebar from '../Sidebar/Sidebar';
 import SearchModal from '../SearchModal/SearchModal';
-import { UserContext } from '../UserContext';
 import LoadingScreen from '../LoadingScreen/LoadingScreen';
 
-const ProfileView = (props) => {
+const ProfileView = () => {
   const { id } = useParams();
-  const loggedInUser= JSON.parse(localStorage.getItem('user'))
+  const loggedInUser = JSON.parse(localStorage.getItem('user'));
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState('highlights');
   const [about, setAbout] = useState('');
@@ -58,7 +57,11 @@ const ProfileView = (props) => {
   };
 
   useEffect(() => {
+    document.body.classList.add('profile-view-body');
     fetchUser();
+    return () => {
+      document.body.classList.remove('profile-view-body');
+    };
   }, [id]);
 
   useEffect(() => {
@@ -124,30 +127,30 @@ const ProfileView = (props) => {
   }
 
   return (
-    <div className="profile-page">
+    <div className="profile-view-page">
       <Sidebar toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
 
-      <div className="profile-content">
-        <div className="profile-header">
-          <div className="profile-picture">
+      <div className="profile-view-content">
+        <div className="profile-view-header">
+          <div className="profile-view-picture">
             <img src={user?.profilePicture || defaultProfilePic} alt="Profile" />
           </div>
-          <div className="profile-info">
+          <div className="profile-view-info">
             <h2>{user?.firstName || 'Your Name'} {user?.lastName}</h2>
             <p>{user?.jobTitle || 'Software Engineer'}</p>
             <p>{user?.location || 'Seattle, WA, USA'}</p>
             <p>{connectionCount} Connections</p>
-            <div className="profile-buttons">
-              <button className="profile-button">Contact info</button>
+            <div className="profile-view-buttons">
+              <button className="profile-view-button">Contact info</button>
               {loggedInUser?.id === user?.id ? (
                 <p>Viewing your own public profile <Link to="/profile">Go to editable profile</Link></p>
               ) : (
                 isConnected ? (
-                  <button className="profile-button" onClick={handleRemoveConnection}>
+                  <button className="profile-view-button" onClick={handleRemoveConnection}>
                     Remove Connection
                   </button>
                 ) : (
-                  <button className="profile-button" onClick={handleConnectionRequest} disabled={pendingRequests[user?.id]}>
+                  <button className="profile-view-button" onClick={handleConnectionRequest} disabled={pendingRequests[user?.id]}>
                     {pendingRequests[user?.id] ? 'Request Pending' : 'Connect+'}
                   </button>
                 )
@@ -156,18 +159,18 @@ const ProfileView = (props) => {
           </div>
         </div>
 
-        <div className="profile-tabs">
-          <div className={`tab ${activeTab === 'highlights' ? 'active' : ''}`} onClick={() => handleTabClick('highlights')}>
+        <div className="profile-view-tabs">
+          <div className={`profile-view-tab ${activeTab === 'highlights' ? 'active' : ''}`} onClick={() => handleTabClick('highlights')}>
             Highlights
           </div>
-          <div className={`tab ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => handleTabClick('posts')}>
+          <div className={`profile-view-tab ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => handleTabClick('posts')}>
             Posts
           </div>
         </div>
 
-        <div className="profile-details">
+        <div className="profile-view-details">
           {activeTab === 'highlights' ? (
-            <div className="highlights-section">
+            <div className="profile-view-highlights-section">
               <div className="highlight">
                 <h3>Experience</h3>
                 <p>This is the Experience section. Add your work experiences here.</p>

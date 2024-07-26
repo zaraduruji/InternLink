@@ -1,14 +1,10 @@
-// src/ProfileSetup/ProfileName.jsx
-
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../UserContext';
 import './ProfileSetup.css';
 
 const ProfileName = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(() => {
-    // Initialize user state from localStorage
     const storedUser = localStorage.getItem('user');
     try {
       return storedUser ? JSON.parse(storedUser) : null;
@@ -21,14 +17,15 @@ const ProfileName = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState("");
+
   const updateUser = (newUserData) => {
     setUser(prevUser => {
       const updatedUser = { ...prevUser, ...newUserData };
-      // Store updated user in localStorage
       localStorage.setItem('user', JSON.stringify(updatedUser));
       return updatedUser;
     });
   };
+
   const handleSaveName = async (event) => {
     event.preventDefault();
 
