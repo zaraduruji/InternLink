@@ -18,8 +18,6 @@ const ProfileView = () => {
   const [pendingRequests, setPendingRequests] = useState({});
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-
   const [isHovered, setIsHovered] = useState(false);
 
   const fetchUser = async () => {
@@ -188,7 +186,13 @@ const ProfileView = () => {
             <div className="profile-view-highlights-section">
               <div className="highlight">
                 <h3>Experience</h3>
-                <p>This is the Experience section. Add your work experiences here.</p>
+                {user?.experience?.map((exp, index) => (
+                  <div key={index} className="experience-item">
+                    <h4>{exp.company}</h4>
+                    <p>{exp.position}</p>
+                    <p>{`${exp.startDate} - ${exp.endDate}`}</p>
+                  </div>
+                ))}
               </div>
               <div className="highlight">
                 <h3>Education</h3>
@@ -206,7 +210,11 @@ const ProfileView = () => {
               </div>
               <div className="highlight">
                 <h3>Skills</h3>
-                <p>This is the Skills section. Add your skills here.</p>
+                {user?.skills?.map((skill, index) => (
+                  <div key={index} className="skill-item">
+                    <p>{skill.name}</p>
+                  </div>
+                ))}
               </div>
               <div className="highlight">
                 <h3>About</h3>

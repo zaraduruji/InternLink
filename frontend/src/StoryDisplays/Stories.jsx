@@ -7,7 +7,7 @@ const Stories = ({ currentUser }) => {
   const [stories, setStories] = useState([]);
   const storiesListRef = useRef(new StoriesList());
   const [viewingStories, setViewingStories] = useState(null);
-
+  console.log('story', stories)
   const fetchStories = useCallback(() => {
     fetch('http://localhost:3000/api/stories')
       .then(response => response.json())
