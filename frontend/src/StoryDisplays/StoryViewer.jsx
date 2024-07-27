@@ -7,7 +7,7 @@ const StoryViewer = ({ stories, onClose, currentUser, onDeleteStory }) => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [showMenu, setShowMenu] = useState(false);
-
+  console.log(stories)
   useEffect(() => {
     const timer = setInterval(() => {
       if (progress < 100) {
@@ -92,7 +92,7 @@ const StoryViewer = ({ stories, onClose, currentUser, onDeleteStory }) => {
   const activeUser = stories[currentUserIndex];
   const currentStory = activeUser?.stories[currentStoryIndex];
   const isCurrentUserStory = activeUser.id === currentUser.id;
-
+  console.log(activeUser)
   return (
     <div className="story-viewer">
       <div className="story-container">

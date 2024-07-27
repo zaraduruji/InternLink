@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import './Profile.css';
 import Modal from 'react-modal';
@@ -323,6 +322,7 @@ const Profile = () => {
   };
 
   const saveSkillDetails = () => {
+
     const newSkill = {
       name: skillDetails,
     };
