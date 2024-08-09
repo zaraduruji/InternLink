@@ -474,7 +474,9 @@ const Profile = () => {
         <h2>Add to profile</h2>
         <hr />
         <p>Upload Your Profile Picture With LinkedIn!</p>
-        <button onClick={handleLinkedInSignIn}>Upload photo with LinkedIn</button>
+        <button className="linkedin-upload-button" onClick={handleLinkedInSignIn}>
+            Upload photo with LinkedIn
+          </button>
         <h3>OR</h3>
         <p>Manual Setup</p>
         <p className="modal-subtext">Start with the basics. Filling out these sections will help you be discovered by recruiters and people you may know.</p>

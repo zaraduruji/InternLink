@@ -76,6 +76,7 @@ body.profile-body {
   height: 100px;
   border-radius: 50%;
   margin-right: 20px;
+  object-fit: cover; /* Ensure the image covers the container */
 }
 
 .profile-info {
@@ -138,17 +139,16 @@ body.profile-body {
 
 .highlights-section .highlight {
   padding: 20px 0;
-    border-bottom: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
+  border-bottom: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
 }
 
 .highlights-section .highlight:last-child {
   border-bottom: none;
 }
-
 
 .modal {
   position: fixed;
@@ -213,11 +213,9 @@ body.profile-body {
   display: none;
 }
 
-
 .upload-photo-button input[type="file"] {
   display: none;
 }
-
 
 .modal video {
   width: 100%;
@@ -252,7 +250,7 @@ body.profile-body {
 .suggestions-list img {
   width: 40px;
   height: 40px;
-  object-fit: contain;
+  object-fit: cover; /* Ensure the image covers the container */
   margin-right: 10px;
   border-radius: 50%;
 }
@@ -329,18 +327,10 @@ textarea {
   color: black;
 }
 
-.suggestions-list img {
-  width: 30px;
-  height: 30px;
-  margin-right: 10px;
-  object-fit: contain;
-}
-
 textarea {
   resize: none;
   height: 150px;
 }
-
 
 .connection-counter {
   background-color: #ff6600;
@@ -350,4 +340,22 @@ textarea {
   border-radius: 5px;
   cursor: default;
   margin-top: 10px;
+}
+
+.linkedin-upload-button {
+  background-color: #0077b5;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.linkedin-upload-button:hover {
+  background-color: #005f8b;
 }
