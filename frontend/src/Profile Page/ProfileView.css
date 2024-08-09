@@ -1,6 +1,20 @@
-body.profile-view-body {
-    background-color: #000;
-    color: #fff;
+:root {
+    --bg-color: #000;
+    --text-color: #fff;
+    --hover-color: #ff6600;
+    --job-title-color: #bbb;
+  }
+
+  body.light-mode {
+    --bg-color: #fff;
+    --text-color: #000;
+    --hover-color: #ff6600;
+    --job-title-color: #333;
+  }
+
+  body.profile-view-body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
     font-family: Arial, sans-serif;
   }
@@ -48,8 +62,8 @@ body.profile-view-body {
   }
 
   .profile-view-button {
-    background-color: #ff6600;
-    color: white;
+    background-color: var(--hover-color);
+    color: var(--text-color);
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
@@ -57,7 +71,25 @@ body.profile-view-body {
   }
 
   .profile-view-button:hover {
-    background-color: #e65c00;
+    background-color: var(--hover-color);
+  }
+
+  .edit-profile-button {
+    background-color: var(--hover-color);
+    color: var(--text-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .edit-profile-link {
+    color: var(--text-color);
+    text-decoration: none;
+  }
+
+  .edit-profile-link:hover {
+    color: var(--hover-color);
   }
 
   .profile-view-button-container {
@@ -70,8 +102,8 @@ body.profile-view-body {
     position: absolute;
     top: -10px;
     left: 100%;
-    background-color: #333;
-    color: #fff;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     padding: 5px;
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -99,7 +131,7 @@ body.profile-view-body {
   }
 
   .profile-view-tab.active {
-    border-bottom: 2px solid #ff6600;
+    border-bottom: 2px solid var(--hover-color);
   }
 
   .profile-view-details {
@@ -124,7 +156,6 @@ body.profile-view-body {
     border-bottom: none;
   }
 
-
   .profile-view-modal {
     position: fixed;
     top: 50%;
@@ -147,8 +178,8 @@ body.profile-view-body {
   }
 
   .profile-view-modal-button, .profile-view-modal-close {
-    background-color: #ff6600;
-    color: white;
+    background-color: var(--hover-color);
+    color: var(--text-color);
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
@@ -171,7 +202,7 @@ body.profile-view-body {
   }
 
   .profile-view-modal-option:hover {
-    color: #ff6600;
+    color: var(--hover-color);
   }
 
   .profile-view-modal-subtext {

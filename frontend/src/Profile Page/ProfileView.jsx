@@ -159,7 +159,9 @@ const ProfileView = () => {
                 {isHovered && <div className="hover-text">Email address: {user?.email}</div>}
               </div>
               {loggedInUser?.id === user?.id ? (
-                <p>Viewing your own public profile <Link to="/profile">Go to editable profile</Link></p>
+                <button className="profile-view-button edit-profile-button">
+                  <Link to="/profile" className="edit-profile-link">Edit Profile</Link>
+                </button>
               ) : (
                 isConnected ? (
                   <button className="profile-view-button" onClick={handleRemoveConnection}>

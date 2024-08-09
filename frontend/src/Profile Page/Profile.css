@@ -341,3 +341,21 @@ textarea {
   cursor: default;
   margin-top: 10px;
 }
+
+.linkedin-upload-button {
+  background-color: #0077b5;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 10px;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.linkedin-upload-button:hover {
+  background-color: #005f8b;
+}
